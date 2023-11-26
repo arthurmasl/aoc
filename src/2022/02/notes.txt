@@ -1,0 +1,12 @@
+// a - rock
+// b - paper
+// c - scissor
+//
+// x - rock
+// y - paper
+// z - scissor
+//
+//
+// x - lose
+// y - draw
+// z - win
