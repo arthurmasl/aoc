@@ -18,6 +18,7 @@ const maps = lines.slice(1).map((l) =>
       };
     }),
 );
+console.log(maps);
 
 const getSeed = (ranges: any[], seed: number) => {
   const range = ranges.find((r) => seed >= r.src && seed < r.src + r.range);
@@ -38,6 +39,8 @@ const getLocation = (seed: number) => {
 };
 
 self.onmessage = (event: MessageEvent) => {
+  console.log('maps:', maps);
+
   const { range, id } = event.data;
   console.log('Worker started', id);
 

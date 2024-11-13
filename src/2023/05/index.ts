@@ -3,11 +3,6 @@ const workerURL = new URL('worker.ts', import.meta.url).href;
 const text = await Bun.file(`${import.meta.dir}/example.txt`).text();
 export const lines = text.trim().split('\n\n');
 
-type SeedRange = {
-  start: number;
-  end: number;
-  size: number;
-};
 const seeds = lines[0].split(': ')[1].split(' ').map(Number);
 const seedsRanges = [];
 
@@ -19,13 +14,12 @@ for (let i = 0; i < seeds.length; i += 2) {
   });
 }
 
+console.log(seedsRanges);
+
 const locations: number[] = [];
 let workers = seedsRanges.length;
 
 seedsRanges.forEach((range, id) => {
-  let remaining = range.size;
-  let start = range.start;
-
   const worker = new Worker(workerURL, { smol: false });
 
   worker.postMessage({ id, range });
@@ -35,6 +29,7 @@ seedsRanges.forEach((range, id) => {
     // console.log('workers left: ', workers);
     console.log('seed nr', id, event.data);
     console.log(locations);
+    console.log('result: ', Math.min(...locations));
   };
 
   worker.addEventListener('close', () => {
