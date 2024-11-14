@@ -2,18 +2,15 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"aoc/src/internal/utils"
 )
 
 func main() {
-	lines := utils.GetLines("src/2020/01/example")
+	lines := utils.GetLines("src/2020/01/input")
 	nums := utils.ConvertToInts(lines)
 
-	t1 := time.Now()
-	solution2(nums)
-	fmt.Println(time.Since(t1))
+	fmt.Println(solution2(nums))
 }
 
 func solution1(nums []int) int {
@@ -32,8 +29,8 @@ func solution1(nums []int) int {
 
 func solution2(nums []int) int {
 	for i, a := range nums {
-		for i2, b := range nums[i+1:] {
-			for _, c := range nums[i2+1:] {
+		for _, b := range nums[i+1:] {
+			for _, c := range nums[i+2:] {
 				if a+b+c == 2020 {
 					return a * b * c
 				}
