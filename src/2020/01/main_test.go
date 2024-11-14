@@ -22,3 +22,9 @@ func Benchmark_solution2(b *testing.B) {
 		solution2(nums)
 	}
 }
+
+func Benchmark_solution3(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		solution3(nums)
+	}
+}
