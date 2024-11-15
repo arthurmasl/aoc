@@ -49,7 +49,7 @@ func main() {
 		fo := string(word[first-1]) == letter
 		so := string(word[second-1]) == letter
 
-		if (fo && !so) || (!fo && so) {
+		if fo != so {
 			valid++
 		}
 	}
