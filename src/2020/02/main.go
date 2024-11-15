@@ -14,17 +14,18 @@ import (
 // 	valid := 0
 //
 // 	for _, line := range lines {
-// 		letter := strings.Split(strings.Split(line, ": ")[0], " ")[1]
-// 		word := strings.Split(line, ": ")[1]
-// 		numbers := strings.Split(strings.Split(line, " ")[0], "-")
-// 		from, _ := strconv.Atoi(numbers[0])
-// 		to, _ := strconv.Atoi(numbers[1])
+// 		chunks := strings.Split(line, " ")
+// 		numbers := strings.Split(chunks[0], "-")
+// 		n1, _ := strconv.Atoi(numbers[0])
+// 		n2, _ := strconv.Atoi(numbers[1])
+// 		letter := string(chunks[1][0])
+// 		word := chunks[2]
 //
 // 		letterCount := strings.Count(word, letter)
 //
-// 		fmt.Println(from, to, letterCount)
+// 		fmt.Println(n1, n2, letterCount)
 //
-// 		if letterCount >= from && letterCount <= to {
+// 		if letterCount >= n1 && letterCount <= n2 {
 // 			valid++
 // 		}
 // 	}
@@ -38,16 +39,15 @@ func main() {
 	valid := 0
 
 	for _, line := range lines {
-		letter := strings.Split(strings.Split(line, ": ")[0], " ")[1]
-		word := strings.Split(line, ": ")[1]
-		numbers := strings.Split(strings.Split(line, " ")[0], "-")
-		first, _ := strconv.Atoi(numbers[0])
-		second, _ := strconv.Atoi(numbers[1])
+		chunks := strings.Split(line, " ")
+		numbers := strings.Split(chunks[0], "-")
+		n1, _ := strconv.Atoi(numbers[0])
+		n2, _ := strconv.Atoi(numbers[1])
+		letter := string(chunks[1][0])
+		word := chunks[2]
 
-		fmt.Println(word, first, second, word[first], word[second-1])
-
-		fo := string(word[first-1]) == letter
-		so := string(word[second-1]) == letter
+		fo := string(word[n1-1]) == letter
+		so := string(word[n2-1]) == letter
 
 		if fo != so {
 			valid++
