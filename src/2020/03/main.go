@@ -48,12 +48,8 @@ func main() {
 		}
 	}
 
-	sum := 0
-	for _, s := range treeCounts {
-		if sum == 0 {
-			sum = s
-			continue
-		}
+	sum := treeCounts[0]
+	for _, s := range treeCounts[1:] {
 		sum *= s
 	}
 
