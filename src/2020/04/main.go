@@ -60,32 +60,24 @@ func isValid(fields Fields) bool {
 	}
 
 	for key, value := range fields {
-		if key == "byr" || key == "iyr" || key == "eyr" {
+		switch key {
+		case "byr", "iyr", "eyr":
 			year, err := strconv.Atoi(value)
 			if err != nil {
 				return false
 			}
 
-			if key == "byr" {
-				if year < 1920 || year > 2002 {
-					return false
-				}
+			if key == "byr" && (year < 1920 || year > 2002) {
+				return false
+			}
+			if key == "iyr" && (year < 2010 || year > 2020) {
+				return false
+			}
+			if key == "eyr" && (year < 2020 || year > 2030) {
+				return false
 			}
 
-			if key == "iyr" {
-				if year < 2010 || year > 2020 {
-					return false
-				}
-			}
-
-			if key == "eyr" {
-				if year < 2020 || year > 2030 {
-					return false
-				}
-			}
-		}
-
-		if key == "hgt" {
+		case "hgt":
 			mes := value[len(value)-2:]
 			if !strings.Contains("cm", mes) && !strings.Contains("in", mes) {
 				return false
@@ -93,31 +85,24 @@ func isValid(fields Fields) bool {
 
 			height, _ := strconv.Atoi(strings.Split(value, mes)[0])
 
-			if mes == "cm" {
-				if height < 150 || height > 193 {
-					return false
-				}
+			if mes == "cm" && (height < 150 || height > 193) {
+				return false
 			}
-			if mes == "in" {
-				if height < 59 || height > 76 {
-					return false
-				}
+			if mes == "in" && (height < 59 || height > 76) {
+				return false
 			}
-		}
 
-		if key == "hcl" {
+		case "hcl":
 			if !isHex(value) {
 				return false
 			}
-		}
 
-		if key == "ecl" {
+		case "ecl":
 			if !slices.Contains(validColors, value) {
 				return false
 			}
-		}
 
-		if key == "pid" {
+		case "pid":
 			if utf8.RuneCountInString(value) != 9 {
 				return false
 			}
@@ -125,7 +110,6 @@ func isValid(fields Fields) bool {
 			if err != nil {
 				return false
 			}
-
 		}
 	}
 
