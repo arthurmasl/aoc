@@ -7,14 +7,19 @@ import (
 	"strings"
 )
 
-func GetLines(inputDir string) []string {
+func GetLines(inputDir string, args ...string) []string {
 	input, err := os.ReadFile(inputDir)
 	if err != nil {
 		fmt.Println("Error reading file", err)
 		return nil
 	}
 
-	lines := strings.Split(string(input)[:len(input)-1], "\n")
+	sep := "\n"
+	if len(args) > 0 {
+		sep = args[0]
+	}
+
+	lines := strings.Split(string(input)[:len(input)-1], sep)
 	return lines
 }
 
