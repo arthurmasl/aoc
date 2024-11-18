@@ -15,16 +15,9 @@ var (
 	count  = 0
 )
 
-func test(name string, bags Bags, expect int) {
-	if check(name, bags) != expect {
-		panic(name)
-	}
-}
-
 func main() {
-	lines := utils.GetLines("src/2020/07/example")
+	lines := utils.GetLines("src/2020/07/input")
 	bags := make(Bags)
-	counts := make(map[string]bool)
 
 	for _, line := range lines {
 		l := strings.ReplaceAll(strings.ReplaceAll(line, "bags", "bag"), ".", "")
@@ -42,34 +35,16 @@ func main() {
 
 	}
 
-	for bag, contains := range bags {
-		if bag == target {
-			continue
-		}
+	check("shiny gold bag", bags)
 
-		for name := range contains {
-			if check(name, bags) == 1 {
-				counts[bag] = true
-			}
-		}
-	}
-
-	fmt.Println(len(counts))
+	fmt.Println(count)
 }
 
-func check(name string, bags Bags) int {
-	if name == target {
-		return 1
-	}
-
-	for n := range bags[name] {
-		if n == target {
-			return 1
-		}
-		if check(n, bags) == 1 {
-			return 1
+func check(name string, bags Bags) {
+	for n, c := range bags[name] {
+		for range c {
+			count++
+			check(n, bags)
 		}
 	}
-
-	return 0
 }
