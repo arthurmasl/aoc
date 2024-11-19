@@ -113,18 +113,19 @@ func solution5(str []byte) int {
 LL:
 	for {
 		for _, c := range str[index : index+14] {
-			if state&(1<<(c%32)) != 0 {
+			bitIdx := (c % 32)
+
+			if state&(1<<bitIdx) != 0 {
 				state = 0
+				index = gi + 1
 				gi++
-				index = gi
 				continue LL
 			}
 
-			state ^= 1 << (c % 32)
+			state |= 1 << (bitIdx)
 			gi++
 		}
 
 		return index + 14
-
 	}
 }
