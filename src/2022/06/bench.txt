@@ -1,0 +1,11 @@
+goos: darwin
+goarch: arm64
+pkg: aoc/src/2022/06
+cpu: Apple M3 Pro
+Benchmark_solution1-12    	     834	   1224479 ns/op	  224594 B/op	   52737 allocs/op
+Benchmark_solution2-12    	    3001	    399509 ns/op	     133 B/op	       1 allocs/op
+Benchmark_solution3-12    	   14865	     80097 ns/op	       0 B/op	       0 allocs/op
+Benchmark_solution4-12    	   63234	     19143 ns/op	       0 B/op	       0 allocs/op
+Benchmark_solution5-12    	  662878	      1819 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	aoc/src/2022/06	7.216s
