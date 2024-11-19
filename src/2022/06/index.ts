@@ -18,4 +18,7 @@ const getPairs = (str: string[], size = 4) => {
   return str.join('').indexOf(firstMath) + size;
 };
 
+console.time('t1');
 console.log(getPairs(textArr, 14));
+console.timeEnd('t1');
+// 3-4ms
