@@ -82,8 +82,8 @@ LL:
 // 30us
 func solution4(str []byte) int {
 	index := 0
+	gi := 0
 	chunk := make([]byte, 14)
-	ii := 0
 
 LL:
 	for {
@@ -91,14 +91,14 @@ LL:
 			for _, b := range chunk {
 				if b == c {
 					clear(chunk)
-					ii++
-					index = ii
+					gi++
+					index = gi
 					continue LL
 				}
 			}
 
 			chunk[i] = c
-			ii++
+			gi++
 		}
 
 		return index + 14
