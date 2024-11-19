@@ -1,15 +1,16 @@
 # aoc
 
-To install dependencies:
+bun
 
 ```bash
-bun install
+bun run src/2022/06/index.ts
 ```
 
-To run:
+go
 
 ```bash
-bun run index.ts
-```
+modify .air.toml
+air
 
-This project was created using `bun init` in bun v1.0.1. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+go test ./src/2022/06/ -bench=. -benchmem
+```
