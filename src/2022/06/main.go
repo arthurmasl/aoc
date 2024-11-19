@@ -11,7 +11,7 @@ func main() {
 	str := line[:len(line)-1]
 
 	t1 := time.Now()
-	fmt.Println(solution3(str))
+	fmt.Println(solution4(str))
 	fmt.Println(time.Since(t1))
 }
 
@@ -73,6 +73,32 @@ LL:
 			}
 
 			chunk[i] = c
+		}
+
+		return index + 14
+	}
+}
+
+// 30us
+func solution4(str []byte) int {
+	index := 0
+	chunk := make([]byte, 14)
+	ii := 0
+
+LL:
+	for {
+		for i, c := range str[index : index+14] {
+			for _, b := range chunk {
+				if b == c {
+					clear(chunk)
+					ii++
+					index = ii
+					continue LL
+				}
+			}
+
+			chunk[i] = c
+			ii++
 		}
 
 		return index + 14
