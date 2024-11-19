@@ -12,7 +12,7 @@ func main() {
 	str := line[:len(line)-1]
 
 	t1 := time.Now()
-	fmt.Println(solution4(str))
+	fmt.Println(solution5(str))
 	fmt.Println(time.Since(t1))
 }
 
@@ -101,5 +101,30 @@ LL:
 		}
 
 		return index + 14
+	}
+}
+
+// 15us
+func solution5(str []byte) int {
+	index := 0
+	gi := 0
+	state := uint32(0)
+
+LL:
+	for {
+		for _, c := range str[index : index+14] {
+			if state&(1<<(c%32)) != 0 {
+				state = 0
+				gi++
+				index = gi
+				continue LL
+			}
+
+			state ^= 1 << (c % 32)
+			gi++
+		}
+
+		return index + 14
+
 	}
 }
