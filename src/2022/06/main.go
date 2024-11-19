@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"time"
 )
 
@@ -88,13 +89,11 @@ func solution4(str []byte) int {
 LL:
 	for {
 		for i, c := range str[index : index+14] {
-			for _, b := range chunk {
-				if b == c {
-					clear(chunk)
-					gi++
-					index = gi
-					continue LL
-				}
+			if slices.Contains(chunk, c) {
+				clear(chunk)
+				gi++
+				index = gi
+				continue LL
 			}
 
 			chunk[i] = c
