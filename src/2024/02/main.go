@@ -13,7 +13,7 @@ func main() {
 	lines := utils.GetLines("src/2024/02/input")
 	res := 0
 
-l:
+lineLoop:
 	for _, line := range lines {
 		numbersStr := strings.Split(line, " ")
 		numbers := make([]int, len(numbersStr))
@@ -25,15 +25,15 @@ l:
 
 		if isSafe := fullCheck(numbers); isSafe {
 			res++
-			continue l
+			continue lineLoop
 		} else {
 			for i := range numbers {
-				newNumbers := append(append([]int{}, numbers[:i]...), numbers[i+1:]...)
+				withoutIndex := append(append([]int{}, numbers[:i]...), numbers[i+1:]...)
 
-				isSafe = fullCheck(newNumbers)
+				isSafe = fullCheck(withoutIndex)
 				if isSafe {
 					res++
-					continue l
+					continue lineLoop
 				}
 			}
 		}
