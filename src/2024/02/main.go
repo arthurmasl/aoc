@@ -28,9 +28,7 @@ l:
 			continue l
 		} else {
 			for i := range numbers {
-				numbersCopy := make([]int, len(numbers))
-				copy(numbersCopy, numbers)
-				newNumbers := append(numbersCopy[:i], numbersCopy[i+1:]...)
+				newNumbers := append(append([]int{}, numbers[:i]...), numbers[i+1:]...)
 
 				isSafe = fullCheck(newNumbers)
 				if isSafe {
