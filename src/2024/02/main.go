@@ -9,31 +9,56 @@ import (
 	"aoc/src/internal/utils"
 )
 
+func removeIndex(s []int, index int) []int {
+	return append(s[:index], s[index+1:]...)
+}
+
 func main() {
-	lines := utils.GetLines("src/2024/02/example")
+	lines := utils.GetLines("src/2024/02/input")
 	res := 0
 
 l:
 	for _, line := range lines {
 		numbersStr := strings.Split(line, " ")
 		numbers := make([]int, len(numbersStr))
+
 		for i := range numbersStr {
 			num, _ := strconv.Atoi(numbersStr[i])
 			numbers[i] = num
 		}
 
-		for i := range numbers[:len(numbers)-1] {
-			isSafe := checkSafity(i, numbers)
-			if !isSafe {
-				continue l
+		if isSafe := fullCheck(numbers); isSafe {
+			res++
+			continue l
+		} else {
+			for i := range numbers {
+				copySlice := make([]int, len(numbers))
+				copy(copySlice, numbers)
+				newNumbers := append(copySlice[:i], copySlice[i+1:]...)
+
+				isSafe = fullCheck(newNumbers)
+				if isSafe {
+					res++
+					continue l
+				}
 			}
 		}
 
-		// safe
-		res++
 	}
 
 	fmt.Println(res)
+}
+
+func fullCheck(numbers []int) bool {
+	for i := range numbers[:len(numbers)-1] {
+		isSafe := checkSafity(i, numbers)
+
+		if !isSafe {
+			return false
+		}
+	}
+
+	return true
 }
 
 func checkSafity(i int, numbers []int) bool {
