@@ -9,10 +9,6 @@ import (
 	"aoc/src/internal/utils"
 )
 
-func removeIndex(s []int, index int) []int {
-	return append(s[:index], s[index+1:]...)
-}
-
 func main() {
 	lines := utils.GetLines("src/2024/02/input")
 	res := 0
@@ -32,9 +28,9 @@ l:
 			continue l
 		} else {
 			for i := range numbers {
-				copySlice := make([]int, len(numbers))
-				copy(copySlice, numbers)
-				newNumbers := append(copySlice[:i], copySlice[i+1:]...)
+				numbersCopy := make([]int, len(numbers))
+				copy(numbersCopy, numbers)
+				newNumbers := append(numbersCopy[:i], numbersCopy[i+1:]...)
 
 				isSafe = fullCheck(newNumbers)
 				if isSafe {
