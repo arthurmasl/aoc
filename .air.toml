@@ -5,7 +5,8 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main src/2024/04/main.go"
+  # cmd = "go build -o ./tmp/main src/2024/04/main.go"
+  cmd = "go build -o ./tmp/main src/2023/09/main.go"
   # cmd = "go test ./src/2020/01 -bench=."
   delay = 100
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
@@ -14,7 +15,7 @@ tmp_dir = "tmp"
   exclude_unchanged = false
   follow_symlink = false
   full_bin = ""
-  include_dir = ["src/2020", "src/2022", "src/2024"]
+  include_dir = ["src/2020", "src/2022", "src/2023", "src/2024"]
   include_ext = ["go"]
   include_file = []
   kill_delay = "0s"

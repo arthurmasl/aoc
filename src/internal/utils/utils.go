@@ -2,10 +2,17 @@ package utils
 
 import (
 	"fmt"
+	"iter"
 	"os"
 	"strconv"
 	"strings"
 )
+
+func Assert(condition bool) {
+	if !condition {
+		panic("Assertion failed")
+	}
+}
 
 func GetLines(inputDir string, args ...string) []string {
 	input, err := os.ReadFile(inputDir)
@@ -24,11 +31,11 @@ func GetLines(inputDir string, args ...string) []string {
 }
 
 func ConvertToInts(strings []string) []int {
-	var nums []int
+	nums := make([]int, len(strings))
 
-	for _, str := range strings {
+	for i, str := range strings {
 		num, _ := strconv.Atoi(str)
-		nums = append(nums, num)
+		nums[i] = num
 	}
 
 	return nums
@@ -66,4 +73,14 @@ func Reduce[E any](s []E, init E, f reduceFunc[E]) E {
 		cur = f(cur, v)
 	}
 	return cur
+}
+
+func Window[Slice ~[]E, E any](slice Slice, size int) iter.Seq[Slice] {
+	return func(yield func(Slice) bool) {
+		for i := range slice[:len(slice)-size+1] {
+			if !yield(slice[i : i+size]) {
+				return
+			}
+		}
+	}
 }
