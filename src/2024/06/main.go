@@ -10,49 +10,20 @@ type Vector struct {
 	x, y int
 }
 
-// 758 to low
-// 2372 too high
 func main() {
-	lines := utils.GetLines("src/2024/06/input")
-	w, h := len(lines[0]), len(lines)
-
-	visited := make(map[Vector]bool)
-
-	pos := Vector{}
+	lines := utils.GetLines("src/2024/06/example")
 	startPos := Vector{}
-	vel := Vector{0, -1}
 
 	for y := range lines {
 		for x := range lines[y] {
 			if lines[y][x] == '^' {
-				pos = Vector{x: x, y: y}
 				startPos = Vector{x: x, y: y}
-				visited[pos] = true
 			}
 		}
 	}
 
-	for {
-		next := Vector{x: pos.x + vel.x, y: pos.y + vel.y}
-
-		if next.x < 0 || next.x >= w || next.y < 0 || next.y >= h {
-			break
-		}
-
-		if lines[next.y][next.x] == '#' {
-			vel.x, vel.y = -vel.y, vel.x
-			continue
-		}
-
-		pos = next
-
-		// draw
-		// newLine := []rune(lines[pos.y])
-		// newLine[pos.x] = 'X'
-		// lines[pos.y] = string(newLine)
-
-		visited[pos] = true
-	}
+	_, visited := scan(lines, startPos)
+	visited[startPos] = true
 
 	for _, line := range lines {
 		fmt.Println(line)
@@ -71,7 +42,7 @@ func main() {
 		copy(newLines, lines)
 		newLines[v.y] = string(newLine)
 
-		found := scan(newLines, startPos)
+		found, _ := scan(newLines, startPos)
 		if !found {
 			loops++
 		}
@@ -80,21 +51,22 @@ func main() {
 	fmt.Println(len(visited), loops)
 }
 
-func scan(lines []string, pos Vector) bool {
+func scan(lines []string, pos Vector) (bool, map[Vector]bool) {
 	w, h := len(lines[0]), len(lines)
 	vel := Vector{0, -1}
+	visited := make(map[Vector]bool)
 
 	tries := 0
 	for {
 		tries++
 		if tries == 10000 {
-			return false
+			return false, visited
 		}
 
 		next := Vector{x: pos.x + vel.x, y: pos.y + vel.y}
 
 		if next.x < 0 || next.x >= w || next.y < 0 || next.y >= h {
-			return true
+			return true, visited
 		}
 
 		if lines[next.y][next.x] == '#' {
@@ -103,5 +75,10 @@ func scan(lines []string, pos Vector) bool {
 		}
 
 		pos = next
+		visited[pos] = true
+		// draw
+		// newLine := []rune(lines[pos.y])
+		// newLine[pos.x] = 'X'
+		// lines[pos.y] = string(newLine)
 	}
 }
