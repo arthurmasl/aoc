@@ -12,19 +12,19 @@ func main() {
 	lines := utils.GetLines("src/2024/07/example")
 	res := 0
 
-LL:
+lineLoop:
 	for _, line := range lines {
 		expectedStr, numbersStr, _ := strings.Cut(line, ": ")
 		expected, _ := strconv.Atoi(expectedStr)
 		numbers := utils.ConvertToInts(strings.Split(numbersStr, " "))
-		permutaitons := getPermutations([]string{"*", "+", "||"}, len(numbers)-1)
+		permutaitons := generatePermutations([]string{"*", "+", "||"}, len(numbers)-1)
 
-	PL:
+	permutationLoop:
 		for _, permutation := range permutaitons {
 			sum := numbers[0]
+
 			for i, number := range numbers[1:] {
-				sign := permutation[i]
-				switch sign {
+				switch permutation[i] {
 				case "*":
 					sum *= number
 				case "+":
@@ -35,11 +35,11 @@ LL:
 
 				if sum == expected {
 					res += sum
-					continue LL
+					continue lineLoop
 				}
 
 				if sum > expected {
-					continue PL
+					continue permutationLoop
 				}
 			}
 		}
@@ -48,7 +48,7 @@ LL:
 	fmt.Println(res)
 }
 
-func getPermutations(elements []string, k int) [][]string {
+func generatePermutations(elements []string, k int) [][]string {
 	result := [][]string{}
 	permutation := make([]string, k)
 
