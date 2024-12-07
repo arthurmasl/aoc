@@ -10,7 +10,6 @@ import (
 
 func main() {
 	lines := utils.GetLines("src/2024/07/example")
-
 	res := 0
 
 LL:
@@ -19,7 +18,6 @@ LL:
 		expected, _ := strconv.Atoi(expectedStr)
 		numbers := utils.ConvertToInts(strings.Split(numbersStr, " "))
 		permutaitons := getPermutations([]string{"*", "+", "||"}, len(numbers)-1)
-		// fmt.Println(permutaitons)
 
 	PL:
 		for _, permutation := range permutaitons {
@@ -32,12 +30,8 @@ LL:
 				case "+":
 					sum += number
 				case "||":
-					ss := strconv.Itoa(sum)
-					ns := strconv.Itoa(number)
-					newSum, _ := strconv.Atoi(ss + ns)
-					sum = newSum
+					sum, _ = strconv.Atoi(strconv.Itoa(sum) + strconv.Itoa(number))
 				}
-				// fmt.Println(sign, number, sum)
 
 				if sum == expected {
 					res += sum
