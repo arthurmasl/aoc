@@ -23,46 +23,46 @@ func main() {
 		}
 	}
 
-	for id, list := range antennas {
-		fmt.Println(id, list)
-
+	for _, list := range antennas {
 		for i, antenna1 := range list {
 			for _, antenna2 := range list[i+1:] {
-				fmt.Println("antenas", antenna1, antenna2)
 				l, r := getDirectedX(antenna1, antenna2)
 				t, b := getDirectedY(antenna1, antenna2)
 				distanceX := r.x - l.x
 				distanceY := t.y - b.y
 
-				var left, right Vector
-				if l.x == t.x && l.y == t.y || r.x == b.x && r.y == b.y {
-					left = Vector{l.x - distanceX, l.y + distanceY}
-					right = Vector{r.x + distanceX, r.y - distanceY}
-				}
-				if l.x == b.x && l.y == b.y || r.x == t.x && r.y == t.y {
-					left = Vector{l.x - distanceX, l.y - distanceY}
-					right = Vector{r.x + distanceX, r.y + distanceY}
-				}
+				for j := range len(lines) {
+					var left, right Vector
+					if l.x == t.x && l.y == t.y || r.x == b.x && r.y == b.y {
+						left = Vector{l.x - distanceX*j, l.y + distanceY*j}
+						right = Vector{r.x + distanceX*j, r.y - distanceY*j}
 
-				fmt.Println()
+					}
+					if l.x == b.x && l.y == b.y || r.x == t.x && r.y == t.y {
+						left = Vector{l.x - distanceX*j, l.y - distanceY*j}
+						right = Vector{r.x + distanceX*j, r.y + distanceY*j}
+					}
 
-				safeSet(lines, &antinodes, &left)
-				safeSet(lines, &antinodes, &right)
+					safeSet(lines, &antinodes, &left)
+					safeSet(lines, &antinodes, &right)
+				}
 			}
 		}
 	}
 
-	fmt.Println(len(antinodes))
-
 	for pos := range antinodes {
 		newLine := []rune(lines[pos.y])
-		newLine[pos.x] = '#'
+		if newLine[pos.x] == '.' {
+			newLine[pos.x] = '#'
+		}
 		lines[pos.y] = string(newLine)
 	}
 
 	for _, line := range lines {
 		fmt.Println(line)
 	}
+
+	fmt.Println(len(antinodes))
 }
 
 func safeSet(arr []string, target *map[Vector]bool, vector *Vector) {
