@@ -42,18 +42,16 @@ func searchNext(list []string, root, node Node) {
 		paths++
 	}
 
-	safeSet := func(y, x int) {
+	checNext := func(y, x int) {
 		if y >= 0 && y < len(list) && x >= 0 && x < len(list[y]) {
-			next := list[y][x]
-			if curr+1 == next {
-				// fmt.Printf("(%v) %v:%v\n", string(next), y, x)
+			if curr+1 == list[y][x] {
 				searchNext(list, root, Node{x, y})
 			}
 		}
 	}
 
-	safeSet(node.y, node.x-1)
-	safeSet(node.y, node.x+1)
-	safeSet(node.y-1, node.x)
-	safeSet(node.y+1, node.x)
+	checNext(node.y, node.x-1)
+	checNext(node.y, node.x+1)
+	checNext(node.y-1, node.x)
+	checNext(node.y+1, node.x)
 }
