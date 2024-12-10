@@ -10,8 +10,8 @@ type Node struct {
 }
 
 var (
-	paths    = 0
-	visited1 = make(map[Node]map[Node]bool)
+	paths   = 0
+	visited = make(map[Node]map[Node]bool)
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 }
 
 func searchNext(list []string, root, node Node) {
-	// if visited2[root][node] {
+	// if visited[root][node] {
 	// 	return
 	// }
 
