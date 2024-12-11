@@ -3,7 +3,7 @@ package main
 import (
 	"aoc/src/internal/utils"
 	"fmt"
-	"math"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -11,54 +11,57 @@ import (
 func main() {
 	line := utils.GetLines("src/2024/11/input")[0]
 	numbers := utils.ConvertToInts(strings.Split(line, " "))
-	// workers := runtime.GOMAXPROCS(runtime.NumCPU())
 
-	stopProfiling := utils.Profile()
-	defer stopProfiling()
-
-	fmt.Println(numbers)
 	t1 := time.Now()
+	memo := make(map[int]int)
 
-	// 25 - 3ms
-	for iteration := range 25 {
-		t2 := time.Now()
-
-		for i, n := range numbers {
-			if n == 0 {
-				numbers[i] = 1
-				continue
-			}
-
-			if digits := countDigits(n); digits%2 == 0 {
-				l, r := splitNumber(n, digits/2)
-				numbers[i] = l
-				numbers = append(numbers, r)
-				continue
-			}
-
-			numbers[i] = n * 2024
-		}
-
-		fmt.Println(iteration, time.Since(t2))
+	for _, n := range numbers {
+		memo[n] += 1
 	}
 
-	fmt.Printf("answer: %v time: %v\n", len(numbers), time.Since(t1))
+	for range 75 {
+		newNumbers := make(map[int]int)
+
+		for val, count := range memo {
+			if val == 0 {
+				newNumbers[1] += count
+				continue
+			}
+
+			if countDigits(val)%2 == 0 {
+				l, r := splitNumber(val)
+				newNumbers[l] += count
+				newNumbers[r] += count
+				continue
+			}
+
+			newNumbers[val*2024] += count
+		}
+
+		memo = newNumbers
+	}
+
+	total := 0
+	for _, v := range memo {
+		total += v
+	}
+
+	fmt.Println(time.Since(t1))
+	fmt.Println(total)
 }
 
 func countDigits(n int) int {
-	count := 0
-	for n != 0 {
-		n /= 10
-		count++
-	}
-	return count
+	str := strconv.Itoa(n)
+	return len(str)
 }
 
-func splitNumber(number, position int) (int, int) {
-	divisor := int(math.Pow10(position))
+func splitNumber(n int) (int, int) {
+	str := strconv.Itoa(n)
+	half := len(str) / 2
 
-	left := number / divisor
-	right := number % divisor
+	l, r := str[:half], str[half:]
+	left, _ := strconv.Atoi(l)
+	right, _ := strconv.Atoi(r)
 
 	return left, right
 }
