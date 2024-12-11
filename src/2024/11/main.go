@@ -11,36 +11,37 @@ import (
 func main() {
 	line := utils.GetLines("src/2024/11/input")[0]
 	numbers := utils.ConvertToInts(strings.Split(line, " "))
+	// workers := runtime.GOMAXPROCS(runtime.NumCPU())
 
 	stopProfiling := utils.Profile()
 	defer stopProfiling()
 
-	newNumbers := make([]int, 0)
-
 	fmt.Println(numbers)
 	t1 := time.Now()
 
-	for iteration := range 25 {
-		for i := range numbers {
-			if numbers[i] == 0 {
-				newNumbers = append(newNumbers, 1)
+	// 25 - 3ms
+	for iteration := range 35 {
+		t2 := time.Now()
+
+		for i := range len(numbers) {
+			n := numbers[i]
+
+			if n == 0 {
+				numbers[i] = 1
 				continue
 			}
 
-			if digits := countDigits(numbers[i]); digits%2 == 0 {
-				l, r := splitNumber(numbers[i], digits/2)
-				newNumbers = append(newNumbers, l, r)
+			if digits := countDigits(n); digits%2 == 0 {
+				l, r := splitNumber(n, digits/2)
+				numbers[i] = l
+				numbers = append(numbers, r)
 				continue
 			}
 
-			newNumbers = append(newNumbers, numbers[i]*2024)
+			numbers[i] = n * 2024
 		}
 
-		numbers = make([]int, len(newNumbers))
-		copy(numbers, newNumbers)
-		newNumbers = nil
-
-		fmt.Println(iteration, len(numbers))
+		fmt.Println(iteration, time.Since(t2))
 	}
 
 	fmt.Printf("answer: %v time: %v\n", len(numbers), time.Since(t1))
