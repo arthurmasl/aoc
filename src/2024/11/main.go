@@ -20,12 +20,10 @@ func main() {
 	t1 := time.Now()
 
 	// 25 - 3ms
-	for iteration := range 35 {
+	for iteration := range 25 {
 		t2 := time.Now()
 
-		for i := range len(numbers) {
-			n := numbers[i]
-
+		for i, n := range numbers {
 			if n == 0 {
 				numbers[i] = 1
 				continue
