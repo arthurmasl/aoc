@@ -1,8 +1,10 @@
 package main
 
 import (
-	"aoc/src/internal/utils"
 	"fmt"
+	"slices"
+
+	"aoc/src/internal/utils"
 )
 
 type Pos struct {
@@ -11,8 +13,14 @@ type Pos struct {
 
 var visited = make(map[Pos]bool)
 
+// 3916431 to high
+// 874986 to high
+// 830523 no
+// 825587 no
+// 747403 no
+// 690001 to low
 func main() {
-	lines := utils.GetLines("src/2024/12/input")
+	lines := utils.GetLines("input")
 	total := 0
 
 	for y, row := range lines {
@@ -28,38 +36,104 @@ func main() {
 			// fmt.Println(name, positions)
 
 			area := len(positions)
-			perimeter := 0
 
-			sides := make(map[int]int)
-			for _, position := range positions {
-				t := Pos{position.x, position.y - 1}
-				b := Pos{position.x, position.y + 1}
-				l := Pos{position.x - 1, position.y}
-				r := Pos{position.x + 1, position.y}
+			corners := 0
 
-				// perimeter++
-				if getAt(lines, t) != name {
-					perimeter++
+			emptyVisited := make(map[Pos]bool)
+			for _, pos := range positions {
+				// lt
+				if getAt(lines, Pos{pos.x - 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y - 1}) != name {
+					corners += 1
 				}
-				if getAt(lines, b) != name {
-					perimeter++
+				// rt
+				if getAt(lines, Pos{pos.x + 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y - 1}) != name {
+					corners += 1
 				}
-				if getAt(lines, l) != name {
-					perimeter++
+				// rb
+				if getAt(lines, Pos{pos.x + 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y + 1}) != name {
+					corners += 1
 				}
-				if getAt(lines, r) != name {
-					perimeter++
+				// lb
+				if getAt(lines, Pos{pos.x - 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y + 1}) != name {
+					corners += 1
 				}
+
+				if getAt(
+					lines,
+					Pos{pos.x + 1, pos.y + 1},
+				) == getAt(
+					lines,
+					Pos{pos.x - 1, pos.y - 1},
+				) {
+					continue
+				}
+				// if getAt(
+				// 	lines,
+				// 	Pos{pos.x - 1, pos.y + 1},
+				// ) == getAt(
+				// 	lines,
+				// 	Pos{pos.x + 1, pos.y - 1},
+				// ) {
+				// 	continue
+				// }
+
+				// if getAt(lines, Pos{pos.x + 1, pos.y + 1}) != name ||
+				// 	getAt(lines, Pos{pos.x - 1, pos.y - 1}) != name {
+				// 	continue
+				// }
+
+				emptyAround := getEmptyAround(lines, pos)
+				for _, emptyPos := range emptyAround {
+					if emptyVisited[emptyPos] {
+						continue
+					}
+
+					if slices.Contains(positions, emptyPos) {
+						continue
+					}
+
+					// if slices.Contains(positions, Pos{emptyPos.x + 1, emptyPos.y + 1}) {
+					// 	continue
+					// }
+					// if slices.Contains(positions, Pos{emptyPos.x - 1, emptyPos.y - 1}) {
+					// 	continue
+					// }
+
+					// lt
+					if slices.Contains(positions, Pos{emptyPos.x - 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y - 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
+					}
+					// rt
+					if slices.Contains(positions, Pos{emptyPos.x + 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y - 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
+					}
+					// rb
+					if slices.Contains(positions, Pos{emptyPos.x + 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y + 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
+					}
+					// lb
+					if slices.Contains(positions, Pos{emptyPos.x - 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y + 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
+					}
+				}
+
 			}
 
+			fmt.Println(name, corners)
 			// perimeter = len(sides)
-			price := area * perimeter
-
-			if name == "A" {
-				// fmt.Println(name, area, perimeter)
-				fmt.Println(sides)
-				fmt.Println(positions, perimeter)
-			}
+			price := area * corners
 			total += price
 		}
 	}
@@ -67,11 +141,36 @@ func main() {
 	fmt.Println(total)
 }
 
+func getEmptyAround(lines []string, pos Pos) []Pos {
+	positions := make([]Pos, 0)
+
+	top := Pos{pos.x, pos.y - 1}
+	right := Pos{pos.x + 1, pos.y}
+	bottom := Pos{pos.x, pos.y + 1}
+	left := Pos{pos.x - 1, pos.y}
+
+	tryPositions := []Pos{top, right, bottom, left}
+	for _, p := range tryPositions {
+		if hasPos(lines, p) {
+			positions = append(positions, p)
+		}
+	}
+
+	return positions
+}
+
 func getAt(arr []string, pos Pos) string {
 	if pos.y >= 0 && pos.y < len(arr) && pos.x >= 0 && pos.x < len(arr[pos.y]) {
 		return string(arr[pos.y][pos.x])
 	}
 	return ""
+}
+
+func hasPos(arr []string, pos Pos) bool {
+	if pos.y >= 0 && pos.y < len(arr) && pos.x >= 0 && pos.x < len(arr[pos.y]) {
+		return true
+	}
+	return false
 }
 
 func searchNext(list []string, items *[]Pos, pos Pos) {

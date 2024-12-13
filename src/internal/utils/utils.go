@@ -26,7 +26,7 @@ func GetLines(inputDir string, args ...string) []string {
 		sep = args[0]
 	}
 
-	lines := strings.Split(string(input)[:len(input)-1], sep)
+	lines := strings.Split(strings.TrimSpace(string(input)), sep)
 	return lines
 }
 
