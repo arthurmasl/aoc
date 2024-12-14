@@ -49,8 +49,8 @@ func main() {
 		guards[i] = Entity{Vector{posX, posY}, Vector{velX, velY}}
 	}
 
-	// 65
-	fullDraw(grid, guards, 7687)
+	fullDraw(grid, guards, 8000)
+
 	// reader := bufio.NewReader(os.Stdin)
 	// time := 0
 	// for {
@@ -95,31 +95,44 @@ func main() {
 }
 
 func fullDraw(grid []string, guards []Entity, time int) {
+	t := 0
 	for range time {
+		t++
 		for i, guard := range guards {
 			movedPos := Vector{guard.pos.x + guard.vel.x, guard.pos.y + guard.vel.y}
 			guards[i].pos = getSafeValue(grid, movedPos)
 		}
 		draw(grid, guards)
+
+		found := false
+		for y, row := range grid {
+			for range row {
+				if y == 70 {
+					if strings.Contains(row, strings.Repeat("O", 30)) {
+						found = true
+						break
+					}
+				}
+			}
+		}
+
+		if found {
+			fmt.Println(t)
+			for _, row := range grid {
+				fmt.Println(row)
+			}
+		}
+
 	}
 }
 
 func drawNext(grid []string, guards []Entity) {
-	// startFrom := 0
-	// for _ := range 100000 {
 	for i, guard := range guards {
 		movedPos := Vector{guard.pos.x + guard.vel.x, guard.pos.y + guard.vel.y}
 		guards[i].pos = getSafeValue(grid, movedPos)
 	}
 
 	draw(grid, guards)
-
-	// if i >= startFrom {
-	// 	draw(grid, guards)
-	// 	fmt.Println("time: ", i)
-	// 	time.Sleep(time.Millisecond * 300)
-	// }
-	// }
 }
 
 func draw(grid []string, guards []Entity) {
@@ -135,24 +148,6 @@ func draw(grid []string, guards []Entity) {
 			newRow[guard.pos.x] = 'X'
 		}
 		grid[guard.pos.y] = string(newRow)
-	}
-
-	found := false
-	for y, row := range grid {
-		for range row {
-			if y == 70 {
-				if strings.Contains(row, strings.Repeat("O", 30)) {
-					found = true
-					break
-				}
-			}
-		}
-	}
-
-	if found {
-		for _, row := range grid {
-			fmt.Println(row)
-		}
 	}
 }
 
@@ -178,8 +173,6 @@ func getSafeValue(arr []string, pos Vector) Vector {
 	if pos.y >= 0 && pos.y < len(arr) && pos.x >= 0 && pos.x < len(arr[0]) {
 		return pos
 	}
-
-	// teleport
 
 	if pos.x < 0 {
 		pos.x = len(arr[0]) + pos.x
