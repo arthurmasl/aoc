@@ -11,8 +11,6 @@ type Pos struct {
 	x, y int
 }
 
-// 1416421 to high
-// 1431600 bad
 func main() {
 	blocks := utils.GetLines("example", "\n\n")
 	grid := strings.Split(blocks[0], "\n")
@@ -40,8 +38,25 @@ func main() {
 
 	// move
 	for _, move := range moves {
+		prevGrid := make([]string, len(grid))
+		copy(prevGrid, grid)
+
+		movesList = nil
 		robotPos := getRobotPos(grid)
 		tryToMove(&grid, move, robotPos)
+
+		revertMoves := false
+		for _, move := range movesList {
+			if !move.isGood {
+				revertMoves = true
+				break
+			}
+		}
+
+		if revertMoves {
+			grid = prevGrid
+		}
+
 	}
 
 	// draw grid
@@ -59,18 +74,21 @@ func main() {
 		}
 	}
 
-	// utils.Assert(sum == 9021)
 	fmt.Println(sum)
 }
+
+type Move struct {
+	move   rune
+	pos    Pos
+	isGood bool
+}
+
+var movesList = make([]Move, 0)
 
 func tryToMove(grid *[]string, move rune, pos Pos) bool {
 	vel := getVel(move)
 	nextPos := applyVel(pos, vel)
 	nextCell, _ := utils.GetSafeValue(*grid, nextPos.x, nextPos.y)
-	// if !ok || nextCell == '#' {
-	// 	return false
-	// }
-	// cell := (*grid)[pos.y][pos.x]
 
 	switch nextCell {
 	case '.':
@@ -95,16 +113,21 @@ func tryToMove(grid *[]string, move rune, pos Pos) bool {
 					// rollback left
 					movedLeft := applyVel(nextPos, getVel(move))
 					moveElement(grid, movedLeft, nextPos)
+					movesList = append(movesList, Move{getReverseMove(move), movedLeft, false})
 					return false
 				}
 
 				if okRight {
-					return tryToMove(grid, move, pos)
+					ok := tryToMove(grid, move, pos)
+					movesList = append(movesList, Move{move, pos, ok})
+					return ok
 				}
 			}
 		} else {
 			if ok := tryToMove(grid, move, nextPos); ok {
-				return tryToMove(grid, move, pos)
+				ok := tryToMove(grid, move, pos)
+				movesList = append(movesList, Move{move, pos, ok})
+				return ok
 			}
 		}
 	}
