@@ -17,44 +17,46 @@ func main() {
 	robotPos := Pos{}
 	moves := blocks[1]
 
+	// update grid
 	for y, row := range grid {
-		for x := range row {
-			if row[x] == '@' {
+		newRow := ""
+
+		for _, col := range row {
+			switch col {
+			case '#':
+				newRow += "##"
+			case 'O':
+				newRow += "[]"
+			case '.':
+				newRow += ".."
+			case '@':
+				newRow += "@."
+			}
+		}
+
+		grid[y] = newRow
+	}
+
+	// find robot
+	for y, row := range grid {
+		for x, col := range row {
+			if col == '@' {
 				robotPos = Pos{x, y}
 			}
 		}
 	}
 
-	var tryToMove func(move rune, pos Pos) bool
-	tryToMove = func(move rune, pos Pos) bool {
-		vel := getVel(move)
-		nextPos := applyVel(pos, vel)
-		nextCell, _ := utils.GetSafeValue(grid, nextPos.x, nextPos.y)
-
-		switch nextCell {
-		case '.':
-			moveElement(&grid, pos, nextPos)
-			robotPos = nextPos
-			return true
-		case 'O':
-			ok := tryToMove(move, nextPos)
-			if ok {
-				tryToMove(move, pos)
-				return ok
-			}
-		}
-
-		return false
-	}
-
+	// move
 	for _, move := range moves {
-		tryToMove(move, robotPos)
+		tryToMove(&grid, move, robotPos, &robotPos)
 	}
 
+	// draw grid
 	for _, row := range grid {
 		fmt.Println(row)
 	}
 
+	// calculate result
 	sum := 0
 	for y, row := range grid {
 		for x, col := range row {
@@ -65,6 +67,27 @@ func main() {
 	}
 
 	fmt.Println(sum)
+}
+
+func tryToMove(grid *[]string, move rune, pos Pos, robotPos *Pos) bool {
+	vel := getVel(move)
+	nextPos := applyVel(pos, vel)
+	nextCell, _ := utils.GetSafeValue(*grid, nextPos.x, nextPos.y)
+
+	switch nextCell {
+	case '.':
+		moveElement(grid, pos, nextPos)
+		*robotPos = nextPos
+		return true
+	case 'O':
+		ok := tryToMove(grid, move, nextPos, robotPos)
+		if ok {
+			tryToMove(grid, move, pos, robotPos)
+			return ok
+		}
+	}
+
+	return false
 }
 
 func moveElement(grid *[]string, from, to Pos) {
