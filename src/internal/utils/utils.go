@@ -30,6 +30,14 @@ func GetLines(inputDir string, args ...string) []string {
 	return lines
 }
 
+func GetSafeValue(arr []string, x, y int) (byte, bool) {
+	if y >= 0 && y < len(arr) && x >= 0 && x < len(arr[y]) {
+		return arr[y][x], true
+	}
+
+	return 0, false
+}
+
 func ConvertToInts(strings []string) []int {
 	nums := make([]int, len(strings))
 
