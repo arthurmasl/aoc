@@ -60,7 +60,7 @@ func main() {
 	sum := 0
 	for y, row := range grid {
 		for x, col := range row {
-			if col == 'O' {
+			if col == '[' {
 				sum += 100*y + x
 			}
 		}
@@ -79,11 +79,29 @@ func tryToMove(grid *[]string, move rune, pos Pos, robotPos *Pos) bool {
 		moveElement(grid, pos, nextPos)
 		*robotPos = nextPos
 		return true
-	case 'O':
-		ok := tryToMove(grid, move, nextPos, robotPos)
-		if ok {
-			tryToMove(grid, move, pos, robotPos)
-			return ok
+	case '[', ']':
+		if move == '^' || move == 'v' {
+			var nextSiblingPos Pos
+			switch nextCell {
+			case ']':
+				nextSiblingPos = Pos{pos.x - 1, nextPos.y}
+			case '[':
+				nextSiblingPos = Pos{pos.x + 1, nextPos.y}
+			}
+
+			ok := tryToMove(grid, move, nextPos, robotPos)
+			ok2 := tryToMove(grid, move, nextSiblingPos, robotPos)
+			if ok && ok2 {
+				tryToMove(grid, move, pos, robotPos)
+				return true
+			}
+
+		} else {
+			ok := tryToMove(grid, move, nextPos, robotPos)
+			if ok {
+				tryToMove(grid, move, pos, robotPos)
+				return true
+			}
 		}
 	}
 
