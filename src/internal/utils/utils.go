@@ -15,7 +15,7 @@ func Assert(condition bool) {
 }
 
 func GetLines(inputDir string, args ...string) []string {
-	input, err := os.ReadFile(inputDir)
+	input, err := os.ReadFile("data/" + inputDir + ".txt")
 	if err != nil {
 		fmt.Println("Error reading file", err)
 		return nil

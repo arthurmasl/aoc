@@ -11,10 +11,11 @@ type Pos struct {
 	x, y int
 }
 
+// 1416421 to high
+// 1431600 bad
 func main() {
 	blocks := utils.GetLines("example", "\n\n")
 	grid := strings.Split(blocks[0], "\n")
-	robotPos := Pos{}
 	moves := blocks[1]
 
 	// update grid
@@ -37,18 +38,10 @@ func main() {
 		grid[y] = newRow
 	}
 
-	// find robot
-	for y, row := range grid {
-		for x, col := range row {
-			if col == '@' {
-				robotPos = Pos{x, y}
-			}
-		}
-	}
-
 	// move
 	for _, move := range moves {
-		tryToMove(&grid, move, robotPos, &robotPos)
+		robotPos := getRobotPos(grid)
+		tryToMove(&grid, move, robotPos)
 	}
 
 	// draw grid
@@ -66,19 +59,24 @@ func main() {
 		}
 	}
 
+	// utils.Assert(sum == 9021)
 	fmt.Println(sum)
 }
 
-func tryToMove(grid *[]string, move rune, pos Pos, robotPos *Pos) bool {
+func tryToMove(grid *[]string, move rune, pos Pos) bool {
 	vel := getVel(move)
 	nextPos := applyVel(pos, vel)
 	nextCell, _ := utils.GetSafeValue(*grid, nextPos.x, nextPos.y)
+	// if !ok || nextCell == '#' {
+	// 	return false
+	// }
+	// cell := (*grid)[pos.y][pos.x]
 
 	switch nextCell {
 	case '.':
 		moveElement(grid, pos, nextPos)
-		*robotPos = nextPos
 		return true
+
 	case '[', ']':
 		if move == '^' || move == 'v' {
 			var nextSiblingPos Pos
@@ -89,18 +87,24 @@ func tryToMove(grid *[]string, move rune, pos Pos, robotPos *Pos) bool {
 				nextSiblingPos = Pos{pos.x + 1, nextPos.y}
 			}
 
-			ok := tryToMove(grid, move, nextPos, robotPos)
-			ok2 := tryToMove(grid, move, nextSiblingPos, robotPos)
-			if ok && ok2 {
-				tryToMove(grid, move, pos, robotPos)
-				return true
-			}
+			okLeft := tryToMove(grid, move, nextPos)
 
+			if okLeft {
+				okRight := tryToMove(grid, move, nextSiblingPos)
+				if !okRight {
+					// rollback left
+					movedLeft := applyVel(nextPos, getVel(move))
+					moveElement(grid, movedLeft, nextPos)
+					return false
+				}
+
+				if okRight {
+					return tryToMove(grid, move, pos)
+				}
+			}
 		} else {
-			ok := tryToMove(grid, move, nextPos, robotPos)
-			if ok {
-				tryToMove(grid, move, pos, robotPos)
-				return true
+			if ok := tryToMove(grid, move, nextPos); ok {
+				return tryToMove(grid, move, pos)
 			}
 		}
 	}
@@ -137,8 +141,36 @@ func getVel(symbol rune) Pos {
 	return pos
 }
 
+func getReverseMove(symbol rune) rune {
+	switch symbol {
+	case '<':
+		return '>'
+	case '>':
+		return '<'
+	case '^':
+		return 'v'
+	case 'v':
+		return '^'
+	}
+	return 0
+}
+
 func applyVel(pos Pos, vel Pos) Pos {
 	pos.x += vel.x
 	pos.y += vel.y
 	return pos
+}
+
+func getRobotPos(grid []string) Pos {
+	robotPos := Pos{}
+
+	for y, row := range grid {
+		for x, col := range row {
+			if col == '@' {
+				robotPos = Pos{x, y}
+			}
+		}
+	}
+
+	return robotPos
 }
