@@ -16,6 +16,7 @@ type Vector struct {
 // t r b l
 var directions = []Vector{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
 
+// 453 to low
 func main() {
 	lines := utils.GetLines("example")
 
@@ -25,6 +26,9 @@ func main() {
 	distance := make(map[Vector]int)
 	parent := make(map[Vector]Vector)
 	path := make([]Vector, 0)
+	lowestCost := 0
+
+	paths := make(map[int][][]Vector)
 
 	for y, row := range lines {
 		for x, col := range row {
@@ -49,14 +53,14 @@ func main() {
 		currentCost := element.value.cost
 
 		if currentPos == endPos {
-			fmt.Println("end found")
 			path = make([]Vector, 0)
 			for currentPos != startPos {
 				path = append(path, currentPos)
 				currentPos = parent[currentPos]
 			}
 			slices.Reverse(path)
-			fmt.Println(len(path), currentCost)
+			lowestCost = currentCost
+			paths[currentCost] = append(paths[currentCost], path)
 		}
 
 		for _, neighbor := range getNeighbors(lines, currentPos) {
@@ -66,7 +70,7 @@ func main() {
 				newCost += 1000
 			}
 
-			if cost, ok := distance[neighbor]; !ok || newCost < cost {
+			if cost, ok := distance[neighbor]; !ok || newCost <= cost {
 				distance[neighbor] = newCost
 				parent[neighbor] = currentPos
 				heap.Push(
@@ -77,23 +81,39 @@ func main() {
 		}
 	}
 
-	// fill path
-	for _, pos := range path {
-		for y, row := range lines {
-			newRow := []byte(row)
-			for x := range row {
-				if int(pos.x) == x && int(pos.y) == y {
-					newRow[x] = '@'
+	for _, path := range paths[lowestCost] {
+		// lines := utils.GetLines("example")
+		// fill path
+		for _, pos := range path {
+			for y, row := range lines {
+				newRow := []byte(row)
+				for x := range row {
+					if int(pos.x) == x && int(pos.y) == y {
+						newRow[x] = 'O'
+					}
 				}
+				lines[y] = string(newRow)
 			}
-			lines[y] = string(newRow)
 		}
 	}
 
 	// draw grid
-	// for _, row := range lines {
-	// 	fmt.Println(row)
-	// }
+	for _, row := range lines {
+		fmt.Println(row)
+	}
+	fmt.Println()
+
+	total := 1
+	for _, row := range lines {
+		for _, col := range row {
+			if col == 'O' {
+				total++
+			}
+		}
+	}
+
+	fmt.Println(len(paths[lowestCost]))
+	fmt.Println(lowestCost, total)
 }
 
 func getNeighbors(lines []string, pos Vector) []Vector {
