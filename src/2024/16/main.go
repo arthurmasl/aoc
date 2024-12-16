@@ -42,7 +42,7 @@ func main() {
 	}
 
 	priorityQueue := make(PriorityQueue, 0)
-	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, directions[1], 0}})
+	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, directions[1]}})
 
 	distance[startPos] = 0
 
@@ -50,7 +50,7 @@ func main() {
 		element := heap.Pop(&priorityQueue).(*Item)
 		currentPos := element.value.pos
 		currentDir := element.value.direction
-		currentCost := element.value.cost
+		currentCost := element.cost
 
 		if currentPos == endPos {
 			path = make([]Vector, 0)
@@ -61,6 +61,7 @@ func main() {
 			slices.Reverse(path)
 			lowestCost = currentCost
 			paths[currentCost] = append(paths[currentCost], path)
+			continue
 		}
 
 		for _, neighbor := range getNeighbors(lines, currentPos) {
@@ -70,12 +71,12 @@ func main() {
 				newCost += 1000
 			}
 
-			if cost, ok := distance[neighbor]; !ok || newCost <= cost {
+			if cost, ok := distance[neighbor]; !ok || newCost < cost {
 				distance[neighbor] = newCost
 				parent[neighbor] = currentPos
 				heap.Push(
 					&priorityQueue,
-					&Item{value: ItemValue{neighbor, neigborDir, newCost}},
+					&Item{value: ItemValue{neighbor, neigborDir}, cost: newCost},
 				)
 			}
 		}
@@ -134,13 +135,12 @@ func getNeighbors(lines []string, pos Vector) []Vector {
 type ItemValue struct {
 	pos       Vector
 	direction Vector
-	cost      int
 }
 
 type Item struct {
-	value    ItemValue
-	priority int
-	index    int
+	value ItemValue
+	cost  int
+	index int
 }
 
 type PriorityQueue []*Item
@@ -150,7 +150,7 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].priority > pq[j].priority
+	return pq[i].cost > pq[j].cost
 }
 
 func (pq PriorityQueue) Swap(i, j int) {
@@ -178,7 +178,7 @@ func (pq *PriorityQueue) Pop() any {
 
 func (pq *PriorityQueue) update(item *Item, value ItemValue, priority int) {
 	item.value = value
-	item.priority = priority
+	item.cost = priority
 	heap.Fix(pq, item.index)
 }
 
