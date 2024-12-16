@@ -3,7 +3,6 @@ package main
 import (
 	"container/heap"
 	"fmt"
-	"math"
 	"slices"
 
 	"aoc/src/internal/utils"
@@ -13,8 +12,10 @@ type Vector struct {
 	x, y float64
 }
 
-// t r b l
-var directions = []Vector{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
+var (
+	directions = []Vector{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
+	arrows     = []string{"^", ">", "v", "<"}
+)
 
 // 453 to low
 func main() {
@@ -42,7 +43,7 @@ func main() {
 	}
 
 	priorityQueue := make(PriorityQueue, 0)
-	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, directions[1]}})
+	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, arrows[1]}})
 
 	distance[startPos] = 0
 
@@ -61,22 +62,23 @@ func main() {
 			slices.Reverse(path)
 			lowestCost = currentCost
 			paths[currentCost] = append(paths[currentCost], path)
-			continue
+			fmt.Println(currentCost)
 		}
 
 		for _, neighbor := range getNeighbors(lines, currentPos) {
-			neigborDir := GetDirection(currentPos, neighbor)
+			neighborPos := neighbor.pos
+			neigborDir := neighbor.direction
 			newCost := currentCost + 1
 			if neigborDir != currentDir {
 				newCost += 1000
 			}
 
-			if cost, ok := distance[neighbor]; !ok || newCost < cost {
-				distance[neighbor] = newCost
-				parent[neighbor] = currentPos
+			if cost, ok := distance[neighborPos]; !ok || newCost <= cost {
+				distance[neighborPos] = newCost
+				parent[neighborPos] = currentPos
 				heap.Push(
 					&priorityQueue,
-					&Item{value: ItemValue{neighbor, neigborDir}, cost: newCost},
+					&Item{value: ItemValue{neighborPos, neigborDir}, cost: newCost},
 				)
 			}
 		}
@@ -115,17 +117,24 @@ func main() {
 
 	fmt.Println(len(paths[lowestCost]))
 	fmt.Println(lowestCost, total)
+
+	fmt.Println(priorityQueue.Len())
 }
 
-func getNeighbors(lines []string, pos Vector) []Vector {
-	neighbors := make([]Vector, 0)
+type Neighbor struct {
+	pos       Vector
+	direction string
+}
 
-	for _, dir := range directions {
+func getNeighbors(lines []string, pos Vector) []Neighbor {
+	neighbors := make([]Neighbor, 0)
+
+	for i, dir := range directions {
 		neighborPos := Vector{pos.x + dir.x, pos.y + dir.y}
 		neighborId, ok := utils.GetSafeValue(lines, int(neighborPos.x), int(neighborPos.y))
 
 		if ok && neighborId != '#' {
-			neighbors = append(neighbors, neighborPos)
+			neighbors = append(neighbors, Neighbor{neighborPos, arrows[i]})
 		}
 	}
 
@@ -134,7 +143,7 @@ func getNeighbors(lines []string, pos Vector) []Vector {
 
 type ItemValue struct {
 	pos       Vector
-	direction Vector
+	direction string
 }
 
 type Item struct {
@@ -180,38 +189,4 @@ func (pq *PriorityQueue) update(item *Item, value ItemValue, priority int) {
 	item.value = value
 	item.cost = priority
 	heap.Fix(pq, item.index)
-}
-
-func (v Vector) Normalize() Vector {
-	mag := math.Sqrt(v.x*v.x + v.y*v.y)
-	if mag == 0 {
-		return Vector{0, 0}
-	}
-	return Vector{x: v.x / mag, y: v.y / mag}
-}
-
-func Direction(v1, v2 Vector) Vector {
-	dx := v2.x - v1.x
-	dy := v2.y - v1.y
-	return Vector{x: dx, y: dy}.Normalize()
-}
-
-func CardinalDirection(input Vector) Vector {
-	normalized := input.Normalize()
-	if math.Abs(normalized.x) > math.Abs(normalized.y) {
-		if normalized.x > 0 {
-			return Vector{1, 0} // Right
-		}
-		return Vector{-1, 0} // Left
-	} else {
-		if normalized.y > 0 {
-			return Vector{0, 1} // Up
-		}
-		return Vector{0, -1} // Down
-	}
-}
-
-func GetDirection(v1, v2 Vector) Vector {
-	dir := Direction(v1, v2)
-	return CardinalDirection(dir)
 }
