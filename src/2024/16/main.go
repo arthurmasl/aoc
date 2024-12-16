@@ -1,65 +1,78 @@
 package main
 
 import (
-	"container/list"
+	"container/heap"
 	"fmt"
+	"math"
+	"slices"
 
 	"aoc/src/internal/utils"
 )
 
-type Pos struct {
-	x, y int
+type Vector struct {
+	x, y float64
 }
 
-var directions = []Pos{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
+// t r b l
+var directions = []Vector{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
 
 func main() {
 	lines := utils.GetLines("example")
 
-	startPos := Pos{}
-	endPos := Pos{}
+	startPos := Vector{}
+	endPos := Vector{}
 
-	visited := make(map[Pos]bool)
-	parent := make(map[Pos]Pos)
-	path := make([]Pos, 0)
+	distance := make(map[Vector]int)
+	parent := make(map[Vector]Vector)
+	path := make([]Vector, 0)
 
 	for y, row := range lines {
 		for x, col := range row {
 			if col == 'S' {
-				startPos = Pos{x, y}
+				startPos = Vector{float64(x), float64(y)}
 			}
 			if col == 'E' {
-				endPos = Pos{x, y}
+				endPos = Vector{float64(x), float64(y)}
 			}
 		}
 	}
 
-	queue := list.New()
-	queue.PushBack(startPos)
+	priorityQueue := make(PriorityQueue, 0)
+	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, directions[1], 0}})
 
-	visited[startPos] = true
+	distance[startPos] = 0
 
-	for queue.Len() > 0 {
-		element := queue.Front()
-		currentPos := element.Value.(Pos)
-
-		queue.Remove(element)
+	for priorityQueue.Len() > 0 {
+		element := heap.Pop(&priorityQueue).(*Item)
+		currentPos := element.value.pos
+		currentDir := element.value.direction
+		currentCost := element.value.cost
 
 		if currentPos == endPos {
 			fmt.Println("end found")
+			path = make([]Vector, 0)
 			for currentPos != startPos {
 				path = append(path, currentPos)
 				currentPos = parent[currentPos]
 			}
-			break
+			slices.Reverse(path)
+			fmt.Println(len(path), currentCost)
 		}
 
 		for _, neighbor := range getNeighbors(lines, currentPos) {
-			if !visited[neighbor] {
-				queue.PushBack(neighbor)
-				visited[neighbor] = true
-				parent[neighbor] = currentPos
+			neigborDir := GetDirection(currentPos, neighbor)
+			newCost := currentCost + 1
+			if neigborDir != currentDir {
+				newCost += 1000
+			}
 
+			if cost, ok := distance[neighbor]; !ok || newCost < cost {
+				distance[neighbor] = newCost
+				parent[neighbor] = currentPos
+				heap.Push(
+					&priorityQueue,
+					&Item{value: ItemValue{neighbor, neigborDir, newCost}},
+				)
 			}
 		}
 	}
@@ -69,7 +82,7 @@ func main() {
 		for y, row := range lines {
 			newRow := []byte(row)
 			for x := range row {
-				if pos.x == x && pos.y == y {
+				if int(pos.x) == x && int(pos.y) == y {
 					newRow[x] = '@'
 				}
 			}
@@ -78,17 +91,17 @@ func main() {
 	}
 
 	// draw grid
-	for _, row := range lines {
-		fmt.Println(row)
-	}
+	// for _, row := range lines {
+	// 	fmt.Println(row)
+	// }
 }
 
-func getNeighbors(lines []string, pos Pos) []Pos {
-	neighbors := make([]Pos, 0)
+func getNeighbors(lines []string, pos Vector) []Vector {
+	neighbors := make([]Vector, 0)
 
 	for _, dir := range directions {
-		neighborPos := Pos{pos.x + dir.x, pos.y + dir.y}
-		neighborId, ok := utils.GetSafeValue(lines, neighborPos.x, neighborPos.y)
+		neighborPos := Vector{pos.x + dir.x, pos.y + dir.y}
+		neighborId, ok := utils.GetSafeValue(lines, int(neighborPos.x), int(neighborPos.y))
 
 		if ok && neighborId != '#' {
 			neighbors = append(neighbors, neighborPos)
@@ -96,4 +109,89 @@ func getNeighbors(lines []string, pos Pos) []Pos {
 	}
 
 	return neighbors
+}
+
+type ItemValue struct {
+	pos       Vector
+	direction Vector
+	cost      int
+}
+
+type Item struct {
+	value    ItemValue
+	priority int
+	index    int
+}
+
+type PriorityQueue []*Item
+
+func (pq PriorityQueue) Len() int {
+	return len(pq)
+}
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].priority > pq[j].priority
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].index = i
+	pq[j].index = j
+}
+
+func (pq *PriorityQueue) Push(x any) {
+	n := len(*pq)
+	item := x.(*Item)
+	item.index = n
+	*pq = append(*pq, item)
+}
+
+func (pq *PriorityQueue) Pop() any {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	old[n-1] = nil
+	item.index = -1
+	*pq = old[0 : n-1]
+	return item
+}
+
+func (pq *PriorityQueue) update(item *Item, value ItemValue, priority int) {
+	item.value = value
+	item.priority = priority
+	heap.Fix(pq, item.index)
+}
+
+func (v Vector) Normalize() Vector {
+	mag := math.Sqrt(v.x*v.x + v.y*v.y)
+	if mag == 0 {
+		return Vector{0, 0}
+	}
+	return Vector{x: v.x / mag, y: v.y / mag}
+}
+
+func Direction(v1, v2 Vector) Vector {
+	dx := v2.x - v1.x
+	dy := v2.y - v1.y
+	return Vector{x: dx, y: dy}.Normalize()
+}
+
+func CardinalDirection(input Vector) Vector {
+	normalized := input.Normalize()
+	if math.Abs(normalized.x) > math.Abs(normalized.y) {
+		if normalized.x > 0 {
+			return Vector{1, 0} // Right
+		}
+		return Vector{-1, 0} // Left
+	} else {
+		if normalized.y > 0 {
+			return Vector{0, 1} // Up
+		}
+		return Vector{0, -1} // Down
+	}
+}
+
+func GetDirection(v1, v2 Vector) Vector {
+	dir := Direction(v1, v2)
+	return CardinalDirection(dir)
 }
