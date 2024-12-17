@@ -42,14 +42,15 @@ func main() {
 	for pointer != len(opcodes) {
 		opcode := opcodes[pointer]
 		literalOperand := int(opcodes[pointer+1])
+		comboValue := getComboValue(literalOperand, registers)
 
 		switch Opcode(opcode) {
 		case adv:
-			registers[a] >>= getComboValue(literalOperand, registers)
+			registers[a] >>= comboValue
 		case bxl:
 			registers[b] ^= literalOperand
 		case bst:
-			registers[b] = getComboValue(literalOperand, registers) % 8
+			registers[b] = comboValue & 7
 		case jnz:
 			if registers[a] != 0 {
 				pointer = int(literalOperand)
@@ -58,11 +59,11 @@ func main() {
 		case bxc:
 			registers[b] ^= registers[c]
 		case out:
-			output += strconv.Itoa(getComboValue(literalOperand, registers)%8) + ","
+			output += strconv.Itoa(comboValue&7) + ","
 		case bdv:
-			registers[b] = registers[a] >> getComboValue(literalOperand, registers)
+			registers[b] = registers[a] >> comboValue
 		case cdv:
-			registers[c] = registers[a] >> getComboValue(literalOperand, registers)
+			registers[c] = registers[a] >> comboValue
 		}
 
 		pointer += 2
