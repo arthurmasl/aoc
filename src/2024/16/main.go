@@ -1,115 +1,94 @@
 package main
 
 import (
-	"container/heap"
 	"fmt"
-	"slices"
+	"math"
 
 	"aoc/src/internal/utils"
 )
 
 type Vector struct {
-	x, y float64
+	x, y int
+}
+
+type Node struct {
+	pos Vector
+	dir rune
+}
+
+type State struct {
+	node Node
+	path []Vector
+	cost int
 }
 
 var (
 	directions = []Vector{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
-	arrows     = []string{"^", ">", "v", "<"}
+	arrows     = []rune{'^', '>', 'v', '<'}
 )
 
-// 453 to low
 func main() {
-	lines := utils.GetLines("example")
+	grid := utils.GetLines("example")
+	start, end := getInitialPoints(grid)
 
-	startPos := Vector{}
-	endPos := Vector{}
+	lowestCost := math.MaxInt
+	visited := make(map[Node]int)
+	paths := make(map[int][]Vector)
 
-	distance := make(map[Vector]int)
-	parent := make(map[Vector]Vector)
-	path := make([]Vector, 0)
-	lowestCost := 0
+	queue := []State{{node: Node{start, arrows[1]}, path: []Vector{start}, cost: 0}}
 
-	paths := make(map[int][][]Vector)
+	for len(queue) > 0 {
+		currentState := queue[0]
+		queue = queue[1:]
 
-	for y, row := range lines {
-		for x, col := range row {
-			if col == 'S' {
-				startPos = Vector{float64(x), float64(y)}
-			}
-			if col == 'E' {
-				endPos = Vector{float64(x), float64(y)}
-			}
-		}
-	}
-
-	distance[startPos] = 0
-
-	priorityQueue := make(PriorityQueue, 0)
-	heap.Init(&priorityQueue)
-	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, arrows[1]}})
-
-	for priorityQueue.Len() > 0 {
-		element := heap.Pop(&priorityQueue).(*Item)
-		currentPos := element.value.pos
-		currentDir := element.value.direction
-		currentCost := element.cost
-
-		if currentPos == endPos {
-			path = make([]Vector, 0)
-			for currentPos != startPos {
-				path = append(path, currentPos)
-				currentPos = parent[currentPos]
-			}
-			slices.Reverse(path)
-			lowestCost = currentCost
-			paths[currentCost] = append(paths[currentCost], path)
-			fmt.Println(currentCost)
+		if currentState.cost > lowestCost {
 			continue
 		}
 
-		for _, neighbor := range getNeighbors(lines, currentPos) {
-			neighborPos := neighbor.pos
-			neigborDir := neighbor.direction
-			newCost := currentCost + 1
-			if neigborDir != currentDir {
+		if currentState.node.pos == end {
+			if currentState.cost <= lowestCost {
+				lowestCost = currentState.cost
+				paths[lowestCost] = append(paths[lowestCost], currentState.path...)
+			}
+			continue
+		}
+
+		for _, neighbor := range getNeighbors(grid, currentState.node.pos) {
+			newCost := currentState.cost + 1
+			if currentState.node.dir != neighbor.dir {
 				newCost += 1000
 			}
 
-			if cost, ok := distance[neighborPos]; !ok || newCost <= cost {
-				distance[neighborPos] = newCost
-				parent[neighborPos] = currentPos
-				heap.Push(
-					&priorityQueue,
-					&Item{value: ItemValue{neighborPos, neigborDir}, cost: newCost},
-				)
+			if cost, ok := visited[neighbor]; !ok || newCost <= cost {
+				visited[neighbor] = newCost
+
+				queue = append(queue, State{
+					node: neighbor,
+					path: append(append([]Vector{}, currentState.path...), neighbor.pos),
+					cost: newCost,
+				})
 			}
 		}
 	}
 
-	for _, path := range paths[lowestCost] {
-		// lines := utils.GetLines("example")
-		// fill path
-		for _, pos := range path {
-			for y, row := range lines {
-				newRow := []byte(row)
-				for x := range row {
-					if int(pos.x) == x && int(pos.y) == y {
-						newRow[x] = 'O'
-					}
+	for _, pos := range paths[lowestCost] {
+		for y, row := range grid {
+			newRow := []byte(row)
+			for x := range row {
+				if pos.x == x && pos.y == y {
+					newRow[x] = 'O'
 				}
-				lines[y] = string(newRow)
 			}
+			grid[y] = string(newRow)
 		}
 	}
 
-	// draw grid
-	for _, row := range lines {
+	for _, row := range grid {
 		fmt.Println(row)
 	}
-	fmt.Println()
 
-	total := 1
-	for _, row := range lines {
+	total := 0
+	for _, row := range grid {
 		for _, col := range row {
 			if col == 'O' {
 				total++
@@ -117,78 +96,37 @@ func main() {
 		}
 	}
 
-	fmt.Println(len(paths[lowestCost]))
-	fmt.Println(lowestCost, total)
-
-	fmt.Println(priorityQueue.Len())
+	fmt.Println(total)
 }
 
-type Neighbor struct {
-	pos       Vector
-	direction string
+func getInitialPoints(grid []string) (Vector, Vector) {
+	var start, end Vector
+
+	for y, row := range grid {
+		for x, col := range row {
+			if col == 'S' {
+				start = Vector{x, y}
+			}
+			if col == 'E' {
+				end = Vector{x, y}
+			}
+		}
+	}
+
+	return start, end
 }
 
-func getNeighbors(lines []string, pos Vector) []Neighbor {
-	neighbors := make([]Neighbor, 0)
+func getNeighbors(lines []string, pos Vector) []Node {
+	neighbors := make([]Node, 0)
 
 	for i, dir := range directions {
 		neighborPos := Vector{pos.x + dir.x, pos.y + dir.y}
-		neighborId, ok := utils.GetSafeValue(lines, int(neighborPos.x), int(neighborPos.y))
+		neighborId, ok := utils.GetSafeValue(lines, neighborPos.x, neighborPos.y)
 
 		if ok && neighborId != '#' {
-			neighbors = append(neighbors, Neighbor{neighborPos, arrows[i]})
+			neighbors = append(neighbors, Node{neighborPos, arrows[i]})
 		}
 	}
 
 	return neighbors
-}
-
-type ItemValue struct {
-	pos       Vector
-	direction string
-}
-
-type Item struct {
-	value ItemValue
-	cost  int
-	index int
-}
-
-type PriorityQueue []*Item
-
-func (pq PriorityQueue) Len() int {
-	return len(pq)
-}
-
-func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].cost < pq[j].cost
-}
-
-func (pq PriorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
-}
-
-func (pq *PriorityQueue) Push(x any) {
-	n := len(*pq)
-	item := x.(*Item)
-	item.index = n
-	*pq = append(*pq, item)
-}
-
-func (pq *PriorityQueue) Pop() any {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	old[n-1] = nil
-	item.index = -1
-	*pq = old[0 : n-1]
-	return item
-}
-
-func (pq *PriorityQueue) update(item *Item, value ItemValue, priority int) {
-	item.value = value
-	item.cost = priority
-	heap.Fix(pq, item.index)
 }
