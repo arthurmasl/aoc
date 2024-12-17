@@ -1,11 +1,8 @@
 package main
 
 import (
-	"container/list"
 	"fmt"
-	"os"
-	"os/exec"
-	"time"
+	"slices"
 
 	"aoc/src/internal/utils"
 )
@@ -14,87 +11,156 @@ type Pos struct {
 	x, y int
 }
 
-var (
-	directions = []Pos{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
-	visited    = make(map[Pos]bool)
-)
+var visited = make(map[Pos]bool)
 
 func main() {
-	lines := utils.GetLines("example")
-	canvas := createCanvas(lines)
+	lines := utils.GetLines("input")
+	total := 0
 
 	for y, row := range lines {
 		for x, col := range row {
 			pos := Pos{x, y}
-			if visited[pos] {
+			if _, ok := visited[pos]; ok {
 				continue
 			}
 
-			currId := string(col)
-			queue := list.New()
-			queue.PushFront(pos)
+			name := string(col)
+			positions := make([]Pos, 0)
+			searchNext(lines, &positions, pos)
+			// fmt.Println(name, positions)
 
-			for queue.Len() > 0 {
-				curr := queue.Front()
-				queue.Remove(curr)
-				currPos := curr.Value.(Pos)
+			area := len(positions)
 
-				visited[currPos] = true
-				draw(canvas)
+			corners := 0
 
-				for _, dir := range directions {
-					nextPos := Pos{currPos.x + dir.x, currPos.y + dir.y}
-					if visited[nextPos] {
+			emptyVisited := make(map[Pos]bool)
+			for _, pos := range positions {
+				emptyAround := getEmptyAround(lines, pos)
+
+				for _, emptyPos := range emptyAround {
+					if emptyVisited[emptyPos] {
 						continue
 					}
 
-					if nextId, ok := getSafeValue(lines, nextPos); ok {
-						if nextId == currId {
-							queue.PushFront(nextPos)
-						}
+					if slices.Contains(positions, emptyPos) {
+						continue
+					}
+
+					// lt
+					if slices.Contains(positions, Pos{emptyPos.x - 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y - 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
+					}
+					// rt
+					if slices.Contains(positions, Pos{emptyPos.x + 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y - 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
+					}
+					// rb
+					if slices.Contains(positions, Pos{emptyPos.x + 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y + 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
+					}
+					// lb
+					if slices.Contains(positions, Pos{emptyPos.x - 1, emptyPos.y}) &&
+						slices.Contains(positions, Pos{emptyPos.x, emptyPos.y + 1}) {
+						corners += 1
+						emptyVisited[emptyPos] = true
 					}
 				}
+
+				// lt
+				if getAt(lines, Pos{pos.x - 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y - 1}) != name &&
+					!slices.Contains(positions, Pos{pos.x - 1, pos.y - 1}) {
+					corners += 1
+				}
+				// rt
+				if getAt(lines, Pos{pos.x + 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y - 1}) != name &&
+					!slices.Contains(positions, Pos{pos.x + 1, pos.y - 1}) {
+					corners += 1
+				}
+				// rb
+				if getAt(lines, Pos{pos.x + 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y + 1}) != name &&
+					!slices.Contains(positions, Pos{pos.x + 1, pos.y + 1}) {
+					corners += 1
+				}
+				// lb
+				if getAt(lines, Pos{pos.x - 1, pos.y}) != name &&
+					getAt(lines, Pos{pos.x, pos.y + 1}) != name &&
+					!slices.Contains(positions, Pos{pos.x - 1, pos.y + 1}) {
+					corners += 1
+				}
+
 			}
 
+			fmt.Println(name, corners)
+			// perimeter = len(sides)
+			price := area * corners
+			total += price
 		}
 	}
+
+	fmt.Println(total)
 }
 
-func getSafeValue(arr []string, pos Pos) (string, bool) {
-	if pos.y >= 0 && pos.y < len(arr) && pos.x >= 0 && pos.x < len(arr[0]) {
-		return string(arr[pos.y][pos.x]), true
+func getEmptyAround(lines []string, pos Pos) []Pos {
+	positions := make([]Pos, 0)
+
+	top := Pos{pos.x, pos.y - 1}
+	right := Pos{pos.x + 1, pos.y}
+	bottom := Pos{pos.x, pos.y + 1}
+	left := Pos{pos.x - 1, pos.y}
+
+	tryPositions := []Pos{top, right, bottom, left}
+	for _, p := range tryPositions {
+		if hasPos(lines, p) {
+			positions = append(positions, p)
+		}
 	}
-	return "", false
+
+	return positions
 }
 
-func createCanvas(lines []string) *[]string {
-	return &lines
+func getAt(arr []string, pos Pos) string {
+	if pos.y >= 0 && pos.y < len(arr) && pos.x >= 0 && pos.x < len(arr[pos.y]) {
+		return string(arr[pos.y][pos.x])
+	}
+	return ""
 }
 
-var reset = "\033[0m"
+func hasPos(arr []string, pos Pos) bool {
+	if pos.y >= 0 && pos.y < len(arr) && pos.x >= 0 && pos.x < len(arr[pos.y]) {
+		return true
+	}
+	return false
+}
 
-func draw(canvas *[]string) {
-	cmd := exec.Command("clear")
-	cmd.Stdout = os.Stdout
-	cmd.Run()
+func searchNext(list []string, items *[]Pos, pos Pos) {
+	if visited[pos] {
+		return
+	}
 
-	fmt.Println()
-	for y, row := range *canvas {
-		for x, char := range row {
-			if visited[Pos{x, y}] {
-				color := getColorByLetter(char)
-				fmt.Print(color + string(char) + reset)
-			} else {
-				fmt.Print(string(char))
+	curr := list[pos.y][pos.x]
+	visited[pos] = true
+
+	(*items) = append(*items, pos)
+
+	checNext := func(y, x int) {
+		if y >= 0 && y < len(list) && x >= 0 && x < len(list[y]) {
+			if curr == list[y][x] {
+				searchNext(list, items, Pos{x, y})
 			}
 		}
-		fmt.Println()
 	}
 
-	time.Sleep(time.Millisecond * 10)
-}
-
-func getColorByLetter(letter rune) string {
-	colorCode := (int(letter) - int('A')) + 16
-	return fmt.Sprintf("\033[38;5;%dm", colorCode%256)
+	checNext(pos.y, pos.x-1)
+	checNext(pos.y, pos.x+1)
+	checNext(pos.y-1, pos.x)
+	checNext(pos.y+1, pos.x)
 }
