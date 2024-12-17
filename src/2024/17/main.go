@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 
@@ -32,7 +31,6 @@ const (
 
 const fileName = "example"
 
-// 503576154 bad
 func main() {
 	blocks := utils.GetLines(fileName, "\n\n")
 	registers := getRegisters(blocks[0])
@@ -40,47 +38,46 @@ func main() {
 
 	pointer := 0
 	output := ""
+
 	for pointer != len(opcodes) {
 		opcode := opcodes[pointer]
-
-		literalOperand := opcodes[pointer+1]
-		comboOperand := getOperandValue(literalOperand, registers)
+		literalOperand := int(opcodes[pointer+1])
 
 		switch Opcode(opcode) {
 		case adv:
-			registers[a] = registers[a] / int(math.Pow(2, float64(comboOperand)))
+			registers[a] >>= getComboValue(literalOperand, registers)
 		case bxl:
 			registers[b] ^= literalOperand
 		case bst:
-			registers[b] = comboOperand % 8
+			registers[b] = getComboValue(literalOperand, registers) % 8
 		case jnz:
 			if registers[a] != 0 {
-				pointer = literalOperand
+				pointer = int(literalOperand)
 				continue
 			}
 		case bxc:
 			registers[b] ^= registers[c]
 		case out:
-			output += strconv.Itoa(comboOperand%8) + ","
+			output += strconv.Itoa(getComboValue(literalOperand, registers)%8) + ","
 		case bdv:
-			registers[b] = registers[a] / int(math.Pow(2, float64(comboOperand)))
+			registers[b] = registers[a] >> getComboValue(literalOperand, registers)
 		case cdv:
-			registers[c] = registers[a] / int(math.Pow(2, float64(comboOperand)))
+			registers[c] = registers[a] >> getComboValue(literalOperand, registers)
 		}
 
 		pointer += 2
 	}
 
-	result := strings.ReplaceAll(output, ",", "")
+	result := output[:len(output)-1]
 	fmt.Println(result)
-	fmt.Println(registers[a], registers[b], registers[c])
+	// fmt.Println(registers[a], registers[b], registers[c])
 
 	if fileName == "example" {
-		utils.Assert(result == "4635635210")
+		utils.Assert(result == "4,6,3,5,6,3,5,2,1,0")
 	}
 }
 
-func getOperandValue(operand int, registers [3]int) int {
+func getComboValue(operand int, registers [3]int) int {
 	switch operand {
 	case 0, 1, 2, 3:
 		return operand
@@ -107,8 +104,6 @@ func getRegisters(block string) [3]int {
 }
 
 func getProgram(block string) []int {
-	_, numbers, _ := strings.Cut(block, ": ")
-	opcodes := utils.ConvertToInts(strings.Split(numbers, ","))
-
-	return opcodes
+	_, numsStr, _ := strings.Cut(block, ": ")
+	return utils.ConvertToInts(strings.Split(numsStr, ","))
 }
