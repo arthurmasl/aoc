@@ -42,10 +42,11 @@ func main() {
 		}
 	}
 
-	priorityQueue := make(PriorityQueue, 0)
-	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, arrows[1]}})
-
 	distance[startPos] = 0
+
+	priorityQueue := make(PriorityQueue, 0)
+	heap.Init(&priorityQueue)
+	heap.Push(&priorityQueue, &Item{value: ItemValue{startPos, arrows[1]}})
 
 	for priorityQueue.Len() > 0 {
 		element := heap.Pop(&priorityQueue).(*Item)
@@ -63,6 +64,7 @@ func main() {
 			lowestCost = currentCost
 			paths[currentCost] = append(paths[currentCost], path)
 			fmt.Println(currentCost)
+			continue
 		}
 
 		for _, neighbor := range getNeighbors(lines, currentPos) {
@@ -159,7 +161,7 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].cost > pq[j].cost
+	return pq[i].cost < pq[j].cost
 }
 
 func (pq PriorityQueue) Swap(i, j int) {
