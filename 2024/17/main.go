@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"aoc/internal/utils"
 )
@@ -33,94 +32,63 @@ const (
 const fileName = "input"
 
 func main() {
-	fromG := int64(139100100000181)
-	// to := 290000000000000
-	// r := to - from
+	blocks := utils.GetLines(fileName, "\n\n")
+	registers := getRegisters(blocks[0])
+	opcodes := getProgram(blocks[1])
 
-	ranges := [12][2]int64{
-		{1, 12574991666651},
-		{12574991666652, 25149983333302},
-		{25149983333303, 37724974999953},
-		{37724974999954, 50299966666604},
-		{50299966666605, 62874958333255},
-		{62874958333256, 75449949999906},
-		{75449949999907, 88024941666557},
-		{88024941666558, 100599933333208},
-		{100599933333209, 113174924999859},
-		{113174924999860, 125749916666510},
-		{125749916666511, 138324908333161},
-		{138324908333162, 150899899999819},
-	}
+	fmt.Println(blocks[1])
 
-	for i, chunk := range ranges {
-		from := chunk[0]
-		to := chunk[1]
-		r := to - from
+	pointer := 0
+	output := ""
 
-		go func(threadId int) {
-			fmt.Println("start", threadId)
+	operations := []string{}
 
-			blocks := utils.GetLines(fileName, "\n\n")
-			registers := getRegisters(blocks[0])
-			opcodes := getProgram(blocks[1])
+	for pointer != len(opcodes) {
+		opcode := opcodes[pointer]
+		literalOperand := int(opcodes[pointer+1])
+		comboValue := getComboValue(literalOperand, registers)
 
-			for i := range r {
-				registers[a] = from + fromG + i
-
-				pointer := 0
-				output := ""
-
-				for pointer != len(opcodes) {
-					opcode := opcodes[pointer]
-					literalOperand := int(opcodes[pointer+1])
-					comboValue := getComboValue(literalOperand, registers)
-
-					switch Opcode(opcode) {
-					case adv:
-						registers[a] >>= comboValue
-					case bxl:
-						registers[b] ^= int64(literalOperand)
-					case bst:
-						registers[b] = comboValue & 7
-					case jnz:
-						if registers[a] != 0 {
-							pointer = int(literalOperand)
-							continue
-						}
-					case bxc:
-						registers[b] ^= registers[c]
-					case out:
-						output += strconv.Itoa(int(comboValue&7)) + ","
-					case bdv:
-						registers[b] = registers[a] >> comboValue
-					case cdv:
-						registers[c] = registers[a] >> comboValue
-					}
-
-					pointer += 2
-				}
-
-				// from 35000000000000
-				// to 290000000000000
-
-				result := output[:len(output)-1]
-				// fmt.Println(len(result)/2 + 1)
-				// fmt.Println(result)
-				// fmt.Println(registers[a], registers[b], registers[c])
-
-				if i%10000000 == 0 {
-					fmt.Printf("thread %v, result: %v (%v)\n", threadId, result, len(result)/2+1)
-				}
-
-				if result == "2,4,1,1,7,5,1,5,0,3,4,4,5,5,3,0" {
-					fmt.Println("===found", from+i)
-					break
-				}
+		switch Opcode(opcode) {
+		case adv:
+			registers[a] >>= comboValue
+			operations = append(operations, fmt.Sprintf("a>>=%v ", comboValue))
+		case bxl:
+			registers[b] ^= int64(literalOperand)
+			operations = append(
+				operations,
+				fmt.Sprintf("b^=%v=%v ", literalOperand, (registers[b]^int64(literalOperand))),
+			)
+		case bst:
+			registers[b] = comboValue & 7
+			operations = append(operations, fmt.Sprintf("b=%-10v&7=%v ", comboValue, comboValue&7))
+		case jnz:
+			if registers[a] != 0 {
+				pointer = int(literalOperand)
+				// operations = append(operations, fmt.Sprint("jnz ", literalOperand))
+				operations = append(operations, "\n")
+				continue
 			}
-		}(i)
+		case bxc:
+			registers[b] ^= registers[c]
+			operations = append(operations, fmt.Sprintf("b^=c(%v)", (registers[b]^registers[c])))
+		case out:
+			output += strconv.Itoa(int(comboValue&7)) + ","
+			operations = append(operations, fmt.Sprintf("out %v ", comboValue&7))
+		case bdv:
+			registers[b] = registers[a] >> comboValue
+			operations = append(operations, "bdv")
+		case cdv:
+			registers[c] = registers[a] >> comboValue
+			operations = append(operations, fmt.Sprintf("c=a>>%v ", comboValue))
+		}
+
+		pointer += 2
 	}
 
-	time.Sleep(time.Hour * 2)
+	result := output[:len(output)-1]
+	fmt.Println("Output: ", result)
+	fmt.Println()
+	fmt.Println(strings.Join(operations, ""))
 }
 
 func getComboValue(operand int, registers [3]int64) int64 {
