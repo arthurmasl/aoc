@@ -2,65 +2,117 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 
 	"aoc/internal/utils"
 )
 
 const (
-	exampleInput  = 23999685
-	exampleOutput = 503576154
-	target        = 2411751503445530
+	from = 36000000000000
+	to   = 290000000000000
 )
 
-func main() {
-	input := exampleInput
-	output := toInt(program(input))
+const (
+	exampleInput  = 23999685
+	exampleOutput = "503576154"
+	target        = "2411751503445530"
+)
 
-	fmt.Println("input ", input)
-	fmt.Println("output", output)
-	fmt.Println("target", target)
+var targetArr = []int{2, 4, 1, 1, 7, 5, 1, 5, 0, 3, 4, 4, 5, 5, 3, 0}
+
+// wow
+// input := 164525255782333
+// wow2 164525658435517
+func main() {
+	//                 x
+	//       164525658435517
+	input := 164525658435517
+	//       164525658435517
+	output := program(input)
+
+	// change - 1645256 / 58435517
+
+	// fmt.Println("input ", input)
+	fmt.Println("output", output[0:10], output[10:11], output[11:])
+	fmt.Println("target", target[0:10], target[10:11], target[11:])
+	// fmt.Println("target", target)
 	fmt.Println()
 
-	utils.Assert(toInt(program(exampleInput)) == exampleOutput)
-	// utils.Assert(toInt(program(reverseProgram(target))) == target)
+	utils.Assert(strings.Contains(program(input), "2411751503"))
+	utils.Assert(strings.Contains(program(input), "45530"))
+
+	// utils.Assert(program(exampleInput) == exampleOutput)
+	// utils.Assert(toInt(program(reverseProgram(targetArr))) == target)
+
+	// bruteforce()
+	// letsgo()
 }
 
-func program(a int) []int {
-	var result []int
+func program(a int) string {
+	var result string
 
-	for a != 0 {
-		b := ((a & 7) ^ 1)
+	for a > 0 {
+		b := a&7 ^ 1
 		c := a >> b
-		b ^= 5
 		a >>= 3
-		b ^= c
+		b ^= 5 ^ c
 
 		output := b & 7
-		result = append(result, output)
+		result += strconv.Itoa(output)
 	}
 
 	return result
 }
 
-func reverseProgram(target int) int {
-	targetStr := strconv.Itoa(target)
-	digits := len(targetStr)
+func letsgo() {
+	// change - 1645256 / 58435517
+	// left := "16452565843"
+	right := "58435517"
 
-	var a, b, c int
+	i := 9999999
+	for {
+		i--
+		numberStr := strconv.Itoa(i) + right
+		number, _ := strconv.Atoi(numberStr)
 
-	for i := digits - 1; i >= 0; i-- {
-		b, _ = strconv.Atoi(string(targetStr[i]))
+		result := program(number)
+		if result == target {
+			fmt.Println(number)
+			break
+		}
+		if strings.Contains(result, "2411751503") {
+			fmt.Println(result, number)
+		}
+	}
+}
 
-		c = (a >> (b ^ 1)) & 7
-		b ^= c
-		b ^= 5
+func bruteforce() {
+	a := 164525658435261
+	for {
+		a += 1
+		result := program(a)
+		if result == target {
+			fmt.Println("=== found!!", a)
+			break
+		}
 
-		a <<= 3
-		a |= (b & 7)
+		//                                      x
+		//                           2411751503445530
+		if strings.Contains(result, "24117515034") {
+			fmt.Println(result, a)
+		}
 	}
 
-	return a
+	// time.Sleep(time.Hour)
+}
+
+func clearConsole() {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 }
 
 func toInt(ints []int) int {

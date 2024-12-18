@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"aoc/internal/utils"
 )
@@ -35,8 +36,6 @@ func main() {
 	registers := getRegisters(blocks[0])
 	opcodes := getProgram(blocks[1])
 
-	fmt.Println(blocks[1])
-
 	pointer := 0
 	output := ""
 
@@ -63,7 +62,8 @@ func main() {
 			if registers[a] != 0 {
 				pointer = int(literalOperand)
 				// operations = append(operations, fmt.Sprint("jnz ", literalOperand))
-				operations = append(operations, fmt.Sprintf("jmp %v\n", literalOperand))
+				// operations = append(operations, fmt.Sprintf("jmp %v\n", literalOperand))
+				operations = append(operations, "\n")
 				continue
 			}
 		case bxc:
@@ -92,36 +92,10 @@ func main() {
 	// result := output[:len(output)-1]
 	// fmt.Println("Output: ", result)
 	// fmt.Println()
-	// fmt.Println(strings.Join(operations, ""))
+	fmt.Println(strings.Join(operations, ""))
 
 	// fmt.Println()
-	smol()
-}
-
-func smol() {
-	input := "23999685"
-
-	var a, b, c int
-	var result string
-	a, _ = strconv.Atoi(input)
-
-	for range len(input) + 1 {
-		b = ((a & 7) ^ 1)
-		c = a >> b
-		b ^= 5
-		a >>= 3
-		b ^= c
-
-		result += strconv.Itoa(b & 7)
-	}
-
-	fmt.Println("target 2411751503445530")
-	fmt.Println("output", result)
-	fmt.Println(a, b, c)
-
-	if result == "2411751503445530" {
-		panic("done")
-	}
+	// smol()
 }
 
 func getComboValue(operand int, registers [3]int64) int64 {
@@ -154,43 +128,3 @@ func getProgram(block string) []int {
 	_, numsStr, _ := strings.Cut(block, ": ")
 	return utils.ConvertToInts(strings.Split(numsStr, ","))
 }
-
-// func bruteforce() {
-// 	fromG := 139100100000181
-// 	toG := 290000000000000
-//
-// 	delta := (toG - fromG) / 11
-//
-// 	for threadId := range 12 {
-// 		from := fromG + delta*threadId
-// 		to := from + delta
-//
-// 		go func(threadId int) {
-// 			fmt.Println("Start thread", threadId)
-//
-// 			for i := from; i < to; i++ {
-// 				result := ""
-// 				a := fromG + i
-// 				if i%100000000 == 0 {
-// 					fmt.Println(threadId, a)
-// 				}
-// 				for range 9 {
-// 					b := ((a & 7) ^ 1)
-// 					c := a >> b
-// 					b ^= 5
-// 					a >>= 3
-// 					b ^= c
-//
-// 					result += strconv.Itoa(b & 7)
-// 				}
-//
-// 				if result == "2411751503445530" {
-// 					fmt.Println(fromG + i)
-// 					panic("done")
-// 				}
-// 			}
-// 		}(threadId)
-// 	}
-//
-// 	time.Sleep(time.Hour * 4)
-// }
