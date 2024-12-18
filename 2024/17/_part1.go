@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"aoc/internal/utils"
 )
@@ -32,63 +31,63 @@ const (
 const fileName = "input"
 
 func main() {
-	// blocks := utils.GetLines(fileName, "\n\n")
-	// registers := getRegisters(blocks[0])
-	// opcodes := getProgram(blocks[1])
-	//
-	// fmt.Println(blocks[1])
-	//
-	// pointer := 0
-	// output := ""
-	//
-	// operations := []string{}
-	//
-	// for pointer != len(opcodes) {
-	// 	opcode := opcodes[pointer]
-	// 	literalOperand := int(opcodes[pointer+1])
-	// 	comboValue := getComboValue(literalOperand, registers)
-	//
-	// 	switch Opcode(opcode) {
-	// 	case adv:
-	// 		registers[a] >>= comboValue
-	// 		operations = append(operations, fmt.Sprintf("a>>=%v=%v ", comboValue, registers[a]))
-	// 	case bxl:
-	// 		registers[b] ^= int64(literalOperand)
-	// 		operations = append(
-	// 			operations,
-	// 			fmt.Sprintf("b^=%v=%v ", literalOperand, registers[b]))
-	// 	case bst:
-	// 		registers[b] = comboValue & 7
-	// 		operations = append(operations, fmt.Sprintf("b=%-10v&7=%v ", comboValue, comboValue&7))
-	// 	case jnz:
-	// 		if registers[a] != 0 {
-	// 			pointer = int(literalOperand)
-	// 			// operations = append(operations, fmt.Sprint("jnz ", literalOperand))
-	// 			operations = append(operations, fmt.Sprintf("jmp %v\n", literalOperand))
-	// 			continue
-	// 		}
-	// 	case bxc:
-	// 		registers[b] ^= registers[c]
-	// 		operations = append(
-	// 			operations,
-	// 			fmt.Sprintf("b^=c(%v)=%v ", registers[b], registers[b]),
-	// 		)
-	// 	case out:
-	// 		output += strconv.Itoa(int(comboValue&7)) + ","
-	// 		operations = append(operations, fmt.Sprintf("out (%v&7)=%v ", comboValue, comboValue&7))
-	// 	case bdv:
-	// 		registers[b] = registers[a] >> comboValue
-	// 		operations = append(operations, "bdv")
-	// 	case cdv:
-	// 		registers[c] = registers[a] >> comboValue
-	// 		operations = append(
-	// 			operations,
-	// 			fmt.Sprintf("c=a>>%v=%v ", comboValue, registers[c]),
-	// 		)
-	// 	}
-	//
-	// 	pointer += 2
-	// }
+	blocks := utils.GetLines(fileName, "\n\n")
+	registers := getRegisters(blocks[0])
+	opcodes := getProgram(blocks[1])
+
+	fmt.Println(blocks[1])
+
+	pointer := 0
+	output := ""
+
+	operations := []string{}
+
+	for pointer != len(opcodes) {
+		opcode := opcodes[pointer]
+		literalOperand := int(opcodes[pointer+1])
+		comboValue := getComboValue(literalOperand, registers)
+
+		switch Opcode(opcode) {
+		case adv:
+			registers[a] >>= comboValue
+			operations = append(operations, fmt.Sprintf("a>>=%v=%v ", comboValue, registers[a]))
+		case bxl:
+			registers[b] ^= int64(literalOperand)
+			operations = append(
+				operations,
+				fmt.Sprintf("b^=%v=%v ", literalOperand, registers[b]))
+		case bst:
+			registers[b] = comboValue & 7
+			operations = append(operations, fmt.Sprintf("b=%-10v&7=%v ", comboValue, comboValue&7))
+		case jnz:
+			if registers[a] != 0 {
+				pointer = int(literalOperand)
+				// operations = append(operations, fmt.Sprint("jnz ", literalOperand))
+				operations = append(operations, fmt.Sprintf("jmp %v\n", literalOperand))
+				continue
+			}
+		case bxc:
+			registers[b] ^= registers[c]
+			operations = append(
+				operations,
+				fmt.Sprintf("b^=c(%v)=%v ", registers[b], registers[b]),
+			)
+		case out:
+			output += strconv.Itoa(int(comboValue&7)) + ","
+			operations = append(operations, fmt.Sprintf("out (%v&7)=%v ", comboValue, comboValue&7))
+		case bdv:
+			registers[b] = registers[a] >> comboValue
+			operations = append(operations, "bdv")
+		case cdv:
+			registers[c] = registers[a] >> comboValue
+			operations = append(
+				operations,
+				fmt.Sprintf("c=a>>%v=%v ", comboValue, registers[c]),
+			)
+		}
+
+		pointer += 2
+	}
 
 	// result := output[:len(output)-1]
 	// fmt.Println("Output: ", result)

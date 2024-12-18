@@ -15,36 +15,32 @@ const (
 
 func main() {
 	input := exampleInput
-	output := program(input)
+	output := toInt(program(input))
 
 	fmt.Println("input ", input)
 	fmt.Println("output", output)
 	fmt.Println("target", target)
 	fmt.Println()
 
-	utils.Assert(program(exampleInput) == exampleOutput)
-	utils.Assert(program(reverseProgram(target)) == target)
+	utils.Assert(toInt(program(exampleInput)) == exampleOutput)
+	// utils.Assert(toInt(program(reverseProgram(target))) == target)
 }
 
-func program(input int) int {
-	var a, b, c int
-	var result string
+func program(a int) []int {
+	var result []int
 
-	a = input
-	digits := len(strconv.Itoa(input)) + 1
-
-	for range digits {
-		b = ((a & 7) ^ 1)
-		c = a >> b
+	for a != 0 {
+		b := ((a & 7) ^ 1)
+		c := a >> b
 		b ^= 5
 		a >>= 3
 		b ^= c
 
-		result += strconv.Itoa(b & 7)
+		output := b & 7
+		result = append(result, output)
 	}
 
-	res, _ := strconv.Atoi(result)
-	return res
+	return result
 }
 
 func reverseProgram(target int) int {
@@ -65,4 +61,13 @@ func reverseProgram(target int) int {
 	}
 
 	return a
+}
+
+func toInt(ints []int) int {
+	str := ""
+	for _, n := range ints {
+		str += strconv.Itoa(n)
+	}
+	number, _ := strconv.Atoi(str)
+	return number
 }
