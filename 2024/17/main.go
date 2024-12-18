@@ -32,63 +32,93 @@ const (
 const fileName = "input"
 
 func main() {
-	blocks := utils.GetLines(fileName, "\n\n")
-	registers := getRegisters(blocks[0])
-	opcodes := getProgram(blocks[1])
+	// blocks := utils.GetLines(fileName, "\n\n")
+	// registers := getRegisters(blocks[0])
+	// opcodes := getProgram(blocks[1])
+	//
+	// fmt.Println(blocks[1])
+	//
+	// pointer := 0
+	// output := ""
+	//
+	// operations := []string{}
+	//
+	// for pointer != len(opcodes) {
+	// 	opcode := opcodes[pointer]
+	// 	literalOperand := int(opcodes[pointer+1])
+	// 	comboValue := getComboValue(literalOperand, registers)
+	//
+	// 	switch Opcode(opcode) {
+	// 	case adv:
+	// 		registers[a] >>= comboValue
+	// 		operations = append(operations, fmt.Sprintf("a>>=%v=%v ", comboValue, registers[a]))
+	// 	case bxl:
+	// 		registers[b] ^= int64(literalOperand)
+	// 		operations = append(
+	// 			operations,
+	// 			fmt.Sprintf("b^=%v=%v ", literalOperand, registers[b]))
+	// 	case bst:
+	// 		registers[b] = comboValue & 7
+	// 		operations = append(operations, fmt.Sprintf("b=%-10v&7=%v ", comboValue, comboValue&7))
+	// 	case jnz:
+	// 		if registers[a] != 0 {
+	// 			pointer = int(literalOperand)
+	// 			// operations = append(operations, fmt.Sprint("jnz ", literalOperand))
+	// 			operations = append(operations, fmt.Sprintf("jmp %v\n", literalOperand))
+	// 			continue
+	// 		}
+	// 	case bxc:
+	// 		registers[b] ^= registers[c]
+	// 		operations = append(
+	// 			operations,
+	// 			fmt.Sprintf("b^=c(%v)=%v ", registers[b], registers[b]),
+	// 		)
+	// 	case out:
+	// 		output += strconv.Itoa(int(comboValue&7)) + ","
+	// 		operations = append(operations, fmt.Sprintf("out (%v&7)=%v ", comboValue, comboValue&7))
+	// 	case bdv:
+	// 		registers[b] = registers[a] >> comboValue
+	// 		operations = append(operations, "bdv")
+	// 	case cdv:
+	// 		registers[c] = registers[a] >> comboValue
+	// 		operations = append(
+	// 			operations,
+	// 			fmt.Sprintf("c=a>>%v=%v ", comboValue, registers[c]),
+	// 		)
+	// 	}
+	//
+	// 	pointer += 2
+	// }
 
-	fmt.Println(blocks[1])
+	// result := output[:len(output)-1]
+	// fmt.Println("Output: ", result)
+	// fmt.Println()
+	// fmt.Println(strings.Join(operations, ""))
 
-	pointer := 0
-	output := ""
+	// fmt.Println()
+	smol()
+}
 
-	operations := []string{}
+func smol() {
+	a := 23999685
+	result := ""
 
-	for pointer != len(opcodes) {
-		opcode := opcodes[pointer]
-		literalOperand := int(opcodes[pointer+1])
-		comboValue := getComboValue(literalOperand, registers)
+	for range 9 {
+		b := ((a & 7) ^ 1)
+		c := a >> b
+		b ^= 5
+		a >>= 3
+		b ^= c
 
-		switch Opcode(opcode) {
-		case adv:
-			registers[a] >>= comboValue
-			operations = append(operations, fmt.Sprintf("a>>=%v ", comboValue))
-		case bxl:
-			registers[b] ^= int64(literalOperand)
-			operations = append(
-				operations,
-				fmt.Sprintf("b^=%v=%v ", literalOperand, (registers[b]^int64(literalOperand))),
-			)
-		case bst:
-			registers[b] = comboValue & 7
-			operations = append(operations, fmt.Sprintf("b=%-10v&7=%v ", comboValue, comboValue&7))
-		case jnz:
-			if registers[a] != 0 {
-				pointer = int(literalOperand)
-				// operations = append(operations, fmt.Sprint("jnz ", literalOperand))
-				operations = append(operations, "\n")
-				continue
-			}
-		case bxc:
-			registers[b] ^= registers[c]
-			operations = append(operations, fmt.Sprintf("b^=c(%v)", (registers[b]^registers[c])))
-		case out:
-			output += strconv.Itoa(int(comboValue&7)) + ","
-			operations = append(operations, fmt.Sprintf("out %v ", comboValue&7))
-		case bdv:
-			registers[b] = registers[a] >> comboValue
-			operations = append(operations, "bdv")
-		case cdv:
-			registers[c] = registers[a] >> comboValue
-			operations = append(operations, fmt.Sprintf("c=a>>%v ", comboValue))
-		}
-
-		pointer += 2
+		result += strconv.Itoa(b & 7)
 	}
 
-	result := output[:len(output)-1]
-	fmt.Println("Output: ", result)
-	fmt.Println()
-	fmt.Println(strings.Join(operations, ""))
+	fmt.Println("target 2411751503445530")
+	fmt.Println("output", result)
+
+	if result == "2411751503445530" {
+		panic("done")
+	}
 }
 
 func getComboValue(operand int, registers [3]int64) int64 {
@@ -121,3 +151,43 @@ func getProgram(block string) []int {
 	_, numsStr, _ := strings.Cut(block, ": ")
 	return utils.ConvertToInts(strings.Split(numsStr, ","))
 }
+
+// func bruteforce() {
+// 	fromG := 139100100000181
+// 	toG := 290000000000000
+//
+// 	delta := (toG - fromG) / 11
+//
+// 	for threadId := range 12 {
+// 		from := fromG + delta*threadId
+// 		to := from + delta
+//
+// 		go func(threadId int) {
+// 			fmt.Println("Start thread", threadId)
+//
+// 			for i := from; i < to; i++ {
+// 				result := ""
+// 				a := fromG + i
+// 				if i%100000000 == 0 {
+// 					fmt.Println(threadId, a)
+// 				}
+// 				for range 9 {
+// 					b := ((a & 7) ^ 1)
+// 					c := a >> b
+// 					b ^= 5
+// 					a >>= 3
+// 					b ^= c
+//
+// 					result += strconv.Itoa(b & 7)
+// 				}
+//
+// 				if result == "2411751503445530" {
+// 					fmt.Println(fromG + i)
+// 					panic("done")
+// 				}
+// 			}
+// 		}(threadId)
+// 	}
+//
+// 	time.Sleep(time.Hour * 4)
+// }
