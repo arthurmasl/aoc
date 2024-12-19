@@ -55,7 +55,7 @@ func main() {
 
 	// bruteforce()
 	// letsgo()
-	debug()
+	// debug()
 }
 
 func program(a int) string {
@@ -75,40 +75,33 @@ func program(a int) string {
 }
 
 func debug() {
-	reader := bufio.NewReader(os.Stdin)
-
+	//         164525658435261
+	initial := 164625658435261
 	step := 1
-	a := 332
+
+	a := initial
+
+	reader := bufio.NewReader(os.Stdin)
+	printDebug(a, step)
+
+	// return
 	for {
-		// fmt.Printf("\033[H")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 		if len(input) == 0 {
-			result := program(a)
-			if result == target {
-				fmt.Println("found", a)
-				break
-			}
-
-			clearConsole()
-			fmt.Println("step  ", step)
-			fmt.Println("number", a)
-			fmt.Println("target", target)
-			// fmt.Println("output", result)
-			fmt.Print("output ")
-			for i, c := range result {
-				if target[i] == byte(c) {
-					fmt.Printf("%v%v%v", color, string(c), reset)
-					continue
-				}
-				fmt.Print(string(c))
-			}
-			fmt.Println()
-			fmt.Print("input  ")
+			printDebug(a, step)
 			a += step
 			continue
 		}
 
+		if input == "r" {
+			step = -step
+			continue
+		}
+		if input == "i" {
+			a = initial
+			continue
+		}
 		inputInt, err := strconv.Atoi(input)
 		if err != nil {
 			continue
@@ -117,18 +110,51 @@ func debug() {
 	}
 }
 
+func printDebug(a, step int) {
+	result := program(a)
+	if result == target {
+		fmt.Println("===", a)
+		panic("found")
+	}
+
+	clearConsole()
+	fmt.Println("step  ", step)
+	fmt.Println("number", a)
+	fmt.Println("target", target)
+	// fmt.Println("output", result)
+	fmt.Print("output ")
+	for i, c := range result {
+		if i >= len(target) {
+			fmt.Print(string(c))
+			continue
+		}
+		if target[i] == byte(c) {
+			fmt.Printf("%v%v%v", color, string(c), reset)
+			continue
+		}
+		fmt.Print(string(c))
+	}
+	fmt.Println()
+	fmt.Print("input  ")
+}
+
 func letsgo() {
 	// change - 1645256 / 58435517
-	// left := "16452565843"
-	right := "58435517"
+	left := "164"
+	// right := "58435517"
 
-	i := 9999999
+	i := 100000000000
 	for {
-		i--
-		numberStr := strconv.Itoa(i) + right
+		i++
+		numberStr := left + strconv.Itoa(i)
 		number, _ := strconv.Atoi(numberStr)
 
 		result := program(number)
+		// fmt.Println(number)
+		// fmt.Println(target)
+		// fmt.Println(result)
+		// fmt.Println()
+
 		if result == target {
 			fmt.Println(number)
 			break
@@ -140,7 +166,8 @@ func letsgo() {
 }
 
 func bruteforce() {
-	a := 164525658435261
+	//   164525658435517
+	a := 165525658435517
 	for {
 		a += 1
 		result := program(a)
@@ -151,7 +178,7 @@ func bruteforce() {
 
 		//                                      x
 		//                           2411751503445530
-		if strings.Contains(result, "24117515034") {
+		if strings.Contains(result, "241175150") {
 			fmt.Println(result, a)
 		}
 	}
