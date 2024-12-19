@@ -12,35 +12,33 @@ func main() {
 	patterns := strings.Split(blocks[0], ", ")
 	designs := strings.Split(blocks[1], "\n")
 
-	memo := make(map[string]bool)
+	memo := make(map[string]int)
 
-	var isPossible func(string) bool
-	isPossible = func(design string) bool {
-		has, ok := memo[design]
+	var getPossibleWays func(string) int
+	getPossibleWays = func(design string) int {
+		ways, ok := memo[design]
 		if ok {
-			return true
+			return ways
 		}
 
 		if design == "" {
-			return true
+			return 1
 		}
 
 		for _, pattern := range patterns {
 			if strings.HasPrefix(design, pattern) {
-				has = isPossible(design[len(pattern):])
+				ways += getPossibleWays(design[len(pattern):])
 			}
 		}
 
-		memo[design] = has
-		return has
+		memo[design] = ways
+		return ways
 	}
 
-	count := 0
+	ways := 0
 	for _, design := range designs {
-		if isPossible(design) {
-			count++
-		}
+		ways += getPossibleWays(design)
 	}
 
-	fmt.Println(count)
+	fmt.Println(ways)
 }
