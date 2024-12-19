@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,6 +23,11 @@ const (
 )
 
 var targetArr = []int{2, 4, 1, 1, 7, 5, 1, 5, 0, 3, 4, 4, 5, 5, 3, 0}
+
+var (
+	color = "\033[41m"
+	reset = "\033[0m"
+)
 
 // wow
 // input := 164525255782333
@@ -49,6 +55,7 @@ func main() {
 
 	// bruteforce()
 	// letsgo()
+	debug()
 }
 
 func program(a int) string {
@@ -65,6 +72,49 @@ func program(a int) string {
 	}
 
 	return result
+}
+
+func debug() {
+	reader := bufio.NewReader(os.Stdin)
+
+	step := 1
+	a := 332
+	for {
+		// fmt.Printf("\033[H")
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+		if len(input) == 0 {
+			result := program(a)
+			if result == target {
+				fmt.Println("found", a)
+				break
+			}
+
+			clearConsole()
+			fmt.Println("step  ", step)
+			fmt.Println("number", a)
+			fmt.Println("target", target)
+			// fmt.Println("output", result)
+			fmt.Print("output ")
+			for i, c := range result {
+				if target[i] == byte(c) {
+					fmt.Printf("%v%v%v", color, string(c), reset)
+					continue
+				}
+				fmt.Print(string(c))
+			}
+			fmt.Println()
+			fmt.Print("input  ")
+			a += step
+			continue
+		}
+
+		inputInt, err := strconv.Atoi(input)
+		if err != nil {
+			continue
+		}
+		step = inputInt
+	}
 }
 
 func letsgo() {
