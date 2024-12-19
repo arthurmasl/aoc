@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main 2024/17/main.go"
+  cmd = "go build -o ./tmp/main 2024/19/main.go"
   # cmd = "go build -o ./tmp/main 2022/11/main.go"
   # cmd = "go test ./src/2020/01 -bench=."
   delay = 100

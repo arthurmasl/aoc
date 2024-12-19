@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 
 	"aoc/internal/utils"
@@ -13,29 +12,35 @@ func main() {
 	patterns := strings.Split(blocks[0], ", ")
 	designs := strings.Split(blocks[1], "\n")
 
-	possibleDesigns := make(map[string]bool)
+	memo := make(map[string]bool)
 
-	for _, design := range designs {
-		target := strings.Repeat("x", len(design))
-		draft := design
+	var isPossible func(string) bool
+	isPossible = func(design string) bool {
+		has, ok := memo[design]
+		if ok {
+			return true
+		}
 
-		for _, pattern := range slices.SortedFunc(slices.Values(patterns), sortByLength) {
-			draft = strings.ReplaceAll(draft, pattern, strings.Repeat("x", len(pattern)))
-			if draft == target {
-				possibleDesigns[design] = true
-				break
+		if design == "" {
+			return true
+		}
+
+		for _, pattern := range patterns {
+			if strings.HasPrefix(design, pattern) {
+				has = isPossible(design[len(pattern):])
 			}
 		}
 
+		memo[design] = has
+		return has
 	}
 
-	fmt.Println(len(possibleDesigns))
-}
+	count := 0
+	for _, design := range designs {
+		if isPossible(design) {
+			count++
+		}
+	}
 
-func sortByLength(a, b string) int {
-	return len(b) - len(a)
-}
-
-func sortByLengthRev(a, b string) int {
-	return len(a) - len(b)
+	fmt.Println(count)
 }

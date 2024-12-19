@@ -92,3 +92,13 @@ func Window[Slice ~[]E, E any](slice Slice, size int) iter.Seq[Slice] {
 		}
 	}
 }
+
+func WindowString(str string, size int) iter.Seq[string] {
+	return func(yield func(string) bool) {
+		for i := range str[:len(str)-size+1] {
+			if !yield(str[i : i+size]) {
+				return
+			}
+		}
+	}
+}
