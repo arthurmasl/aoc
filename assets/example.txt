@@ -1,10 +1,15 @@
-r, wr, b, g, bwu, rb, gb, br
-
-brwrr
-bggr
-gbbr
-rrbgbr
-ubwu
-bwurrg
-brgr
-bbrgwb
+WWWWWWWWWWWWWWW
+W...#...#.....W
+W.#.#.#.#.###.W
+WS#...#.#.#...W
+W######.#.#.##W
+W######.#.#...W
+W######.#.###.W
+W##..E#...#...W
+W##.#######.##W
+W...###...#...W
+W.#####.#.###.W
+W.#...#.#.#...W
+W.#.#.#.#.#.##W
+W...#...#...##W
+WWWWWWWWWWWWWWW
