@@ -2,79 +2,61 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"aoc/internal/utils"
 )
 
-// 1498 to high
-func main() {
-	numbers := utils.ConvertToInts(utils.GetLines("example"))
+type stat struct {
+	diff  int
+	price int
+}
 
-	t1 := time.Now()
-	seqs := make(map[[4]int]bool)
+type seq [4]int
+
+func main() {
+	numbers := utils.ConvertToInts(utils.GetLines("input"))
+	total := make(map[seq]int)
 
 	for _, n := range numbers {
-		diffs := make([]int, 2000)
+		memo := make(map[seq]bool)
+		stats := make([]stat, 0, 2000)
 
 		secret := n
 		price := secret % 10
 
-		for i := range 2000 {
-			newSecret := generate(secret)
-			newPrice := newSecret % 10
+		for range 2000 {
+			secret = generate(secret)
+			newPrice := secret % 10
 			diff := newPrice - price
-
-			secret = newSecret
 			price = newPrice
 
-			diffs[i] = diff
+			stats = append(stats, stat{diff, price})
 		}
 
-		for seq := range utils.Window(diffs, 4) {
-			arr := [4]int{seq[0], seq[1], seq[2], seq[3]}
-			seqs[arr] = true
+		for statChunk := range utils.Window(stats, 4) {
+			newSeq := seq{}
+			for i, newStat := range statChunk {
+				newSeq[i] = newStat.diff
+			}
+
+			price := statChunk[len(statChunk)-1].price
+
+			if !memo[newSeq] {
+				memo[newSeq] = true
+				total[newSeq] += price
+			}
+
 		}
 	}
 
 	largest := 0
-	i := 0
-	for targetSeq := range seqs {
-		i++
-		seq := [4]int{}
-		sum := 0
-
-		for _, n := range numbers {
-			secret := n
-			price := secret % 10
-
-			for range 2000 {
-				newSecret := generate(secret)
-				newPrice := newSecret % 10
-				diff := newPrice - price
-
-				secret = newSecret
-				price = newPrice
-
-				seq[0] = seq[1]
-				seq[1] = seq[2]
-				seq[2] = seq[3]
-				seq[3] = diff
-
-				if targetSeq == seq {
-					sum += price
-					break
-				}
-			}
-		}
-
-		if sum > largest {
-			fmt.Println(targetSeq, sum)
-			largest = sum
+	for _, v := range total {
+		if v > largest {
+			largest = v
 		}
 	}
 
-	fmt.Println(largest, time.Since(t1))
+	fmt.Println(largest)
 }
 
 func generate(s int) int {
