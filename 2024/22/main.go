@@ -2,51 +2,87 @@ package main
 
 import (
 	"fmt"
-	"slices"
+	"time"
 
 	"aoc/internal/utils"
 )
 
+// 1498 to high
 func main() {
 	numbers := utils.ConvertToInts(utils.GetLines("example"))
 
-	targetSeq := []int{-2, 1, -1, 3}
-	seq := make([]int, 4)
-
-	sum := 0
+	t1 := time.Now()
+	seqs := make(map[[4]int]bool)
 
 	for _, n := range numbers {
+		diffs := make([]int, 2000)
+
 		secret := n
 		price := secret % 10
 
-		for range 2000 {
-			newSecret := generate(secret, 1)
+		for i := range 2000 {
+			newSecret := generate(secret)
 			newPrice := newSecret % 10
 			diff := newPrice - price
 
 			secret = newSecret
 			price = newPrice
-			seq = seq[1:]
-			seq = append(seq, diff)
 
-			if slices.Equal(seq, targetSeq) {
-				sum += price
-				break
-			}
+			diffs[i] = diff
+		}
+
+		for seq := range utils.Window(diffs, 4) {
+			arr := [4]int{seq[0], seq[1], seq[2], seq[3]}
+			seqs[arr] = true
 		}
 	}
 
-	fmt.Println(sum)
-}
+	largest := 0
+	i := 0
+	for targetSeq := range seqs {
+		i++
+		seq := [4]int{}
+		sum := 0
 
-func generate(s, n int) int {
-	for range n {
-		s = prune(mix(s, s*64))
-		s = prune(mix(s, s/32))
-		s = prune(mix(s, s*2048))
+		for _, n := range numbers {
+			secret := n
+			price := secret % 10
+
+			for range 2000 {
+				newSecret := generate(secret)
+				newPrice := newSecret % 10
+				diff := newPrice - price
+
+				secret = newSecret
+				price = newPrice
+
+				seq[0] = seq[1]
+				seq[1] = seq[2]
+				seq[2] = seq[3]
+				seq[3] = diff
+
+				if targetSeq == seq {
+					sum += price
+					break
+				}
+			}
+		}
+
+		if sum > largest {
+			fmt.Println(targetSeq, sum)
+			largest = sum
+		}
 	}
 
-	return s
+	fmt.Println(largest, time.Since(t1))
+}
+
+func generate(s int) int {
+	newSecret := prune(mix(s, s*64))
+	newSecret = prune(mix(newSecret, newSecret/32))
+	newSecret = prune(mix(newSecret, newSecret*2048))
+
+	return newSecret
 }
 
 func mix(s, n int) int {
