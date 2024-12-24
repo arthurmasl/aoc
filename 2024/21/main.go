@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"slices"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"aoc/internal/utils"
 )
@@ -31,6 +32,7 @@ var (
 	}
 )
 
+// 133676 to high
 // 132312 to low
 // 20592 to low
 func main() {
@@ -43,23 +45,18 @@ func main() {
 		seq3 := getSequence(directional, directionalPos, seq2)
 
 		code, _ := strconv.Atoi(input[:len(input)-1])
-		total += code * len(seq3)
+		total += code * utf8.RuneCountInString(seq3)
 
-		// fmt.Println(input)
-		// fmt.Println(seq1)
-		// fmt.Println(seq2)
-		// fmt.Println(seq3)
+		fmt.Println(input)
+		fmt.Println(seq1)
+		fmt.Println(seq2)
+		fmt.Println(seq3)
 
-		fmt.Println(len(seq3), code)
+		fmt.Println(utf8.RuneCountInString(seq3), code)
 	}
 
 	fmt.Println(total)
 	// utils.Assert(total == 126384)
-}
-
-type mov struct {
-	pos vec
-	key rune
 }
 
 func getSequence(grid []string, initialPos vec, input string) string {
@@ -68,57 +65,56 @@ func getSequence(grid []string, initialPos vec, input string) string {
 
 	for _, targetKey := range input {
 		targetPos := getPos(grid, targetKey)
-		moves := getMoves(pos, targetPos)
+		moves := getMoves(grid, pos, targetPos)
 
-		hasBlank := false
-		for _, move := range moves {
-			if getKey(grid, move.pos) == '_' {
-				hasBlank = true
-			}
-		}
-
-		if hasBlank {
-			slices.Reverse(moves)
-		}
-
-		for _, move := range moves {
-			seq += string(move.key)
-			pos = move.pos
-		}
-
-		seq += "A"
+		seq += moves + "A"
 		pos = targetPos
 	}
 
 	return seq
 }
 
-func getMoves(pos, targetPos vec) []mov {
+func getMoves(grid []string, pos, targetPos vec) string {
+	moves := make([]rune, 0)
 	deltaX := targetPos.x - pos.x
 	deltaY := targetPos.y - pos.y
-	moves := make([]mov, 0)
 
-	if deltaX < 0 {
-		for x := range int(math.Abs(float64(deltaX))) {
-			moves = append(moves, mov{vec{pos.x - (x + 1), pos.y}, '<'})
+	keys := ""
+
+	if deltaX <= 0 {
+		for range deltaX * -1 {
+			moves = append(moves, '<')
+			pos.x -= 1
+			keys += string(getKey(grid, vec{pos.x, pos.y}))
 		}
 	} else {
-		for x := range deltaX {
-			moves = append(moves, mov{vec{pos.x + (x + 1), pos.y}, '>'})
+		for range deltaX {
+			moves = append(moves, '>')
+			pos.x += 1
+			keys += string(getKey(grid, vec{pos.x, pos.y}))
 		}
 	}
 
-	if deltaY < 0 {
-		for y := range int(math.Abs(float64(deltaY))) {
-			moves = append(moves, mov{vec{pos.x, pos.y - (y + 1)}, '^'})
+	if deltaY <= 0 {
+		for range deltaY * -1 {
+			moves = append(moves, '^')
+			pos.y -= 1
+			keys += string(getKey(grid, vec{pos.x, pos.y}))
 		}
 	} else {
-		for y := range deltaY {
-			moves = append(moves, mov{vec{pos.x, pos.y + (y + 1)}, 'v'})
+		for range deltaY {
+			moves = append(moves, 'v')
+			pos.y += 1
+			keys += string(getKey(grid, vec{pos.x, pos.y}))
 		}
 	}
 
-	return moves
+	hasBlank := strings.Contains(keys, "_")
+	if hasBlank {
+		slices.Reverse(moves)
+	}
+
+	return string(moves)
 }
 
 func getKey(grid []string, pos vec) rune {

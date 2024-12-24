@@ -1,22 +1,6 @@
-ta-co
-ta-ka
-de-ta
-kh-ta
+<vA<AA>>^AvAA<^A>Av<<A>>^AvA^A<vA>^Av<<A>^A>AAvA^Av<<A>A>^AAAvA<^A>A
+<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
 
-co,de,ta
-co,ka,ta
-de,ka,ta
+		"_^A",
+		"<v>",
 
-
-aq,cg,yn
-aq,vc,wq
-co,de,ka
-co,de,ta
-co,ka,ta
-de,ka,ta
-kh,qp,ub
-qp,td,wh
-tb,vc,wq
-tc,td,wh
-td,wh,yn
-ub,vc,wq
