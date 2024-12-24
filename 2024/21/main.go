@@ -1,8 +1,9 @@
 package main
 
 import (
-	"container/list"
 	"fmt"
+	"math"
+	"slices"
 	"strconv"
 
 	"aoc/internal/utils"
@@ -30,12 +31,13 @@ var (
 	}
 )
 
+// 132312 to low
 // 20592 to low
 func main() {
-	inputs := utils.GetLines("example")
+	inputs := utils.GetLines("input")
 
 	total := 0
-	for _, input := range inputs[0:1] {
+	for _, input := range inputs {
 		seq1 := getSequence(numeric, numericPos, input)
 		seq2 := getSequence(directional, directionalPos, seq1)
 		seq3 := getSequence(directional, directionalPos, seq2)
@@ -43,16 +45,16 @@ func main() {
 		code, _ := strconv.Atoi(input[:len(input)-1])
 		total += code * len(seq3)
 
-		fmt.Println(input)
-		fmt.Println(seq1)
-		fmt.Println(seq2)
-		fmt.Println(seq3)
+		// fmt.Println(input)
+		// fmt.Println(seq1)
+		// fmt.Println(seq2)
+		// fmt.Println(seq3)
 
 		fmt.Println(len(seq3), code)
 	}
 
 	fmt.Println(total)
-	utils.Assert(total == 126384)
+	// utils.Assert(total == 126384)
 }
 
 type mov struct {
@@ -66,10 +68,22 @@ func getSequence(grid []string, initialPos vec, input string) string {
 
 	for _, targetKey := range input {
 		targetPos := getPos(grid, targetKey)
-		moves := getShortestPath(grid, pos, targetPos)
+		moves := getMoves(pos, targetPos)
+
+		hasBlank := false
+		for _, move := range moves {
+			if getKey(grid, move.pos) == '_' {
+				hasBlank = true
+			}
+		}
+
+		if hasBlank {
+			slices.Reverse(moves)
+		}
 
 		for _, move := range moves {
-			seq += string(move.dir)
+			seq += string(move.key)
+			pos = move.pos
 		}
 
 		seq += "A"
@@ -77,6 +91,34 @@ func getSequence(grid []string, initialPos vec, input string) string {
 	}
 
 	return seq
+}
+
+func getMoves(pos, targetPos vec) []mov {
+	deltaX := targetPos.x - pos.x
+	deltaY := targetPos.y - pos.y
+	moves := make([]mov, 0)
+
+	if deltaX < 0 {
+		for x := range int(math.Abs(float64(deltaX))) {
+			moves = append(moves, mov{vec{pos.x - (x + 1), pos.y}, '<'})
+		}
+	} else {
+		for x := range deltaX {
+			moves = append(moves, mov{vec{pos.x + (x + 1), pos.y}, '>'})
+		}
+	}
+
+	if deltaY < 0 {
+		for y := range int(math.Abs(float64(deltaY))) {
+			moves = append(moves, mov{vec{pos.x, pos.y - (y + 1)}, '^'})
+		}
+	} else {
+		for y := range deltaY {
+			moves = append(moves, mov{vec{pos.x, pos.y + (y + 1)}, 'v'})
+		}
+	}
+
+	return moves
 }
 
 func getKey(grid []string, pos vec) rune {
@@ -93,66 +135,4 @@ func getPos(grid []string, key rune) vec {
 	}
 
 	return vec{}
-}
-
-var (
-	directions = []vec{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
-	keys       = []rune{'^', '>', 'v', '<'}
-)
-
-type vertex struct {
-	pos vec
-	dir rune
-}
-
-func getShortestPath(grid []string, start, end vec) []vertex {
-	parent := make(map[vertex]vertex)
-	path := make([]vertex, 0)
-
-	visited := make(map[vertex]bool)
-	visited[vertex{start, 'A'}] = true
-
-	queue := list.New()
-	queue.PushBack(vertex{start, 'A'})
-
-	for queue.Len() > 0 {
-		node := queue.Front()
-		current := node.Value.(vertex)
-		queue.Remove(node)
-
-		if current.pos == end {
-			path = make([]vertex, 0)
-			for current.pos != start {
-				path = append(path, current)
-				current = parent[current]
-			}
-
-			return path
-		}
-
-		for _, neighbor := range getNeighbors(grid, current.pos) {
-			if !visited[neighbor] {
-				queue.PushBack(neighbor)
-				visited[neighbor] = true
-				parent[neighbor] = current
-			}
-		}
-	}
-
-	return []vertex{}
-}
-
-func getNeighbors(grid []string, pos vec) []vertex {
-	neighbors := make([]vertex, 0)
-
-	for i, dir := range directions {
-		neighborPos := vec{pos.x + dir.x, pos.y + dir.y}
-		neighborId, ok := utils.GetSafeValue(grid, neighborPos.x, neighborPos.y)
-
-		if ok && neighborId != '_' {
-			neighbors = append(neighbors, vertex{neighborPos, keys[i]})
-		}
-	}
-
-	return neighbors
 }
