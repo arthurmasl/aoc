@@ -33,8 +33,8 @@ var (
 )
 
 // 133676 to high
+// 132532
 // 132312 to low
-// 20592 to low
 func main() {
 	inputs := utils.GetLines("input")
 
@@ -81,33 +81,8 @@ func getMoves(grid []string, pos, targetPos vec) string {
 
 	keys := ""
 
-	if deltaX <= 0 {
-		for range deltaX * -1 {
-			moves = append(moves, '<')
-			pos.x -= 1
-			keys += string(getKey(grid, vec{pos.x, pos.y}))
-		}
-	} else {
-		for range deltaX {
-			moves = append(moves, '>')
-			pos.x += 1
-			keys += string(getKey(grid, vec{pos.x, pos.y}))
-		}
-	}
-
-	if deltaY <= 0 {
-		for range deltaY * -1 {
-			moves = append(moves, '^')
-			pos.y -= 1
-			keys += string(getKey(grid, vec{pos.x, pos.y}))
-		}
-	} else {
-		for range deltaY {
-			moves = append(moves, 'v')
-			pos.y += 1
-			keys += string(getKey(grid, vec{pos.x, pos.y}))
-		}
-	}
+	moveX(grid, deltaX, &moves, &pos, &keys)
+	moveY(grid, deltaY, &moves, &pos, &keys)
 
 	hasBlank := strings.Contains(keys, "_")
 	if hasBlank {
@@ -115,6 +90,38 @@ func getMoves(grid []string, pos, targetPos vec) string {
 	}
 
 	return string(moves)
+}
+
+func moveX(grid []string, deltaX int, moves *[]rune, pos *vec, keys *string) {
+	if deltaX < 0 {
+		for range deltaX * -1 {
+			*moves = append(*moves, '<')
+			pos.x -= 1
+			*keys += string(getKey(grid, vec{pos.x, pos.y}))
+		}
+	} else {
+		for range deltaX {
+			*moves = append(*moves, '>')
+			pos.x += 1
+			*keys += string(getKey(grid, vec{pos.x, pos.y}))
+		}
+	}
+}
+
+func moveY(grid []string, deltaY int, moves *[]rune, pos *vec, keys *string) {
+	if deltaY < 0 {
+		for range deltaY * -1 {
+			*moves = append(*moves, '^')
+			pos.y -= 1
+			*keys += string(getKey(grid, vec{pos.x, pos.y}))
+		}
+	} else {
+		for range deltaY {
+			*moves = append(*moves, 'v')
+			pos.y += 1
+			*keys += string(getKey(grid, vec{pos.x, pos.y}))
+		}
+	}
 }
 
 func getKey(grid []string, pos vec) rune {
