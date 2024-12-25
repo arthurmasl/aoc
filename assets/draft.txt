@@ -1,9 +1,21 @@
 mine
-<vA<AA>>^AvAA<^A>Av<<A>>^AvA^A<vA>^Av<<A>^A>AAvA^Av<<A>A>^AAAvA<^A>A
-v<<A>>^A<A>AvA<^AA>A<vAAA>^A
-<A^A>^^AvvvA
+<A^A^^>AvvvA 12
+v<<A>^>A<A>A<AA>vA^Av<AAA^>A 28
+v<A<AA>^>AvA^<A>vA^Av<<A>^>AvA^Av<<A>^>AAvA<A^>A<A>Av<A<A>^>AAA<A>vA^A 70
+1972
+
 
 ex
 <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+v<A<AA>^>AvA^<A>vA^Av<<A>^>AvA^Av<<A>^>AAvA<A^>A<A>Av<A<A>^>AAA<A>vA^A 
+
 v<<A>>^A<A>AvA<^AA>A<vAAA>^A
 <A^A>^^AvvvA
+029A
+
+
+
+m
+v<A<AA>>^AvAA^<A>Av<<A>>^AvA^Av<<A>>^AAvA<A^>A<A>Av<A<A>>^AAA<A>vA^A
+<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+ex

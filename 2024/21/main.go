@@ -1,10 +1,9 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
-	"slices"
 	"strconv"
-	"strings"
 	"unicode/utf8"
 
 	"aoc/internal/utils"
@@ -32,97 +31,131 @@ var (
 	}
 )
 
-// 133676 to high
-// 132532
-// 132312 to low
 func main() {
-	inputs := utils.GetLines("input")
+	inputs := utils.GetLines("example")
 
 	total := 0
-	for _, input := range inputs {
-		seq1 := getSequence(numeric, numericPos, input)
-		seq2 := getSequence(directional, directionalPos, seq1)
-		seq3 := getSequence(directional, directionalPos, seq2)
+	for _, input := range inputs[4:5] {
+		seq := getSequence(numeric, numericPos, input)
+		fmt.Println(seq, len(seq))
+		for range 2 {
+			seq = getSequence(directional, directionalPos, seq)
+			fmt.Println(seq, len(seq))
+		}
+		fmt.Println()
 
+		fmt.Println(len(seq))
 		code, _ := strconv.Atoi(input[:len(input)-1])
-		total += code * utf8.RuneCountInString(seq3)
-
-		fmt.Println(input)
-		fmt.Println(seq1)
-		fmt.Println(seq2)
-		fmt.Println(seq3)
-
-		fmt.Println(utf8.RuneCountInString(seq3), code)
+		total += code * utf8.RuneCountInString(seq)
 	}
 
 	fmt.Println(total)
-	// utils.Assert(total == 126384)
+	utils.Assert(total == 126384)
+
+	// num
+	// pos := vec{2, 2}
+	// m := getShortstMoves(numeric, vec{0, 0}, numericPos)
+	// fmt.Println(m)
+
+	// dir
+	// pos := vec{1, 0}
+	// m := getShortstMoves(directional, directionalPos, pos)
+	// fmt.Println(m)
+}
+
+type keys struct {
+	from rune
+	to   rune
 }
 
 func getSequence(grid []string, initialPos vec, input string) string {
 	seq := ""
 	pos := initialPos
+	lastDir := 'A'
 
 	for _, targetKey := range input {
 		targetPos := getPos(grid, targetKey)
-		moves := getMoves(grid, pos, targetPos)
+		moves := getShortstMoves(grid, pos, targetPos, lastDir)
+		if len(moves) > 0 {
+			lastDir = rune(moves[len(moves)-1])
+		}
 
 		seq += moves + "A"
-		fmt.Println(seq)
 		pos = targetPos
 	}
 
 	return seq
 }
 
-func getMoves(grid []string, pos, targetPos vec) string {
-	moves := make([]rune, 0)
-	deltaX := targetPos.x - pos.x
-	deltaY := targetPos.y - pos.y
+func getShortstMoves(grid []string, start, end vec, dir rune) string {
+	parent := make(map[vec]neighbor)
+	path := ""
 
-	keys := ""
+	visited := make(map[vec]bool)
+	visited[start] = true
 
-	moveX(grid, deltaX, &moves, &pos, &keys)
-	moveY(grid, deltaY, &moves, &pos, &keys)
+	queue := list.New()
+	queue.PushBack(neighbor{start, dir})
 
-	hasBlank := strings.Contains(keys, "_")
-	if hasBlank {
-		slices.Reverse(moves)
+	for queue.Len() > 0 {
+		node := queue.Front()
+		current := node.Value.(neighbor)
+		queue.Remove(node)
+
+		if current.pos == end {
+			path = ""
+			for current.pos != start {
+				path += string(current.dir)
+				current = parent[current.pos]
+			}
+			path = reverseString(path)
+			return path
+		}
+
+		for _, neighbor := range getNeighbors(grid, current.pos) {
+			if !visited[neighbor.pos] && current.dir == neighbor.dir {
+				queue.PushBack(neighbor)
+				visited[neighbor.pos] = true
+				parent[neighbor.pos] = current
+				break
+			}
+		}
+
+		for _, neighbor := range getNeighbors(grid, current.pos) {
+			if !visited[neighbor.pos] {
+				queue.PushBack(neighbor)
+				visited[neighbor.pos] = true
+				parent[neighbor.pos] = current
+			}
+		}
 	}
 
-	return string(moves)
+	return path
 }
 
-func moveX(grid []string, deltaX int, moves *[]rune, pos *vec, keys *string) {
-	if deltaX < 0 {
-		for range deltaX * -1 {
-			*moves = append(*moves, '<')
-			pos.x -= 1
-			*keys += string(getKey(grid, vec{pos.x, pos.y}))
-		}
-	} else {
-		for range deltaX {
-			*moves = append(*moves, '>')
-			pos.x += 1
-			*keys += string(getKey(grid, vec{pos.x, pos.y}))
-		}
-	}
+var (
+	directions = []vec{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
+	arrows     = []rune{'^', '>', 'v', '<'}
+)
+
+type neighbor struct {
+	pos vec
+	dir rune
 }
 
-func moveY(grid []string, deltaY int, moves *[]rune, pos *vec, keys *string) {
-	if deltaY < 0 {
-		for range deltaY * -1 {
-			*moves = append(*moves, '^')
-			pos.y -= 1
-			*keys += string(getKey(grid, vec{pos.x, pos.y}))
-		}
-	} else {
-		for range deltaY {
-			*moves = append(*moves, 'v')
-			pos.y += 1
-			*keys += string(getKey(grid, vec{pos.x, pos.y}))
+func getNeighbors(grid []string, pos vec) []neighbor {
+	neighbors := make([]neighbor, 0)
+
+	for i, dir := range directions {
+		neighborPos := vec{pos.x + dir.x, pos.y + dir.y}
+		neighborId, ok := utils.GetSafeValue(grid, neighborPos.x, neighborPos.y)
+
+		if ok && neighborId != '_' {
+			neighbors = append(neighbors, neighbor{neighborPos, arrows[i]})
 		}
 	}
+
+	return neighbors
 }
 
 func getKey(grid []string, pos vec) rune {
@@ -139,4 +172,12 @@ func getPos(grid []string, key rune) vec {
 	}
 
 	return vec{}
+}
+
+func reverseString(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
 }
