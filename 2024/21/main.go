@@ -35,7 +35,7 @@ func main() {
 	inputs := utils.GetLines("example")
 
 	total := 0
-	for _, input := range inputs[4:5] {
+	for _, input := range inputs {
 		seq := getSequence(numeric, numericPos, input)
 		fmt.Println(seq, len(seq))
 		for range 2 {
