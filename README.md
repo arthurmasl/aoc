@@ -14,3 +14,11 @@ air
 
 go test ./src/2022/06/ -bench=. -benchmem
 ```
+
+odin
+
+```bash
+modify Makefile
+make run
+
+```
