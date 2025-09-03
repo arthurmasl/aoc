@@ -1,7 +1,11 @@
 package main
 
 import "core:fmt"
+import "core:strings"
 
 main :: proc() {
-	fmt.println("hello, odin 2")
+	file := #load("example.txt", string)
+	lines := strings.split_lines(strings.trim_right(file, "\n"))
+
+	fmt.println(lines)
 }
