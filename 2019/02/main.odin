@@ -4,7 +4,7 @@ import "core:fmt"
 import "core:strings"
 
 main :: proc() {
-	file := #load("example.txt", string)
+	file := #load("input", string)
 	lines := strings.split_lines(strings.trim_right(file, "\n"))
 
 	fmt.println(lines)

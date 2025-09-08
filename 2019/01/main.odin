@@ -1,17 +1,21 @@
 package main
 
 import "core:fmt"
-import "core:os"
+import "core:strconv"
 import "core:strings"
 
 main :: proc() {
-	file, ok := os.read_entire_file("assets/example.txt", context.temp_allocator)
-	if !ok do panic("no file")
+	file := #load("input", string)
+	lines := strings.split_lines(strings.trim_right(file, "\n"))
 
-	lines := strings.split_lines(string(file), context.temp_allocator)
-	lines = lines[:len(lines) - 1]
+	sum: int
 
-	fmt.println(lines)
+	for line in lines {
+		n := strconv.atoi(line)
+		res := n / 3 - 2
+		sum += res
+	}
 
-	free_all(context.temp_allocator)
+	fmt.println(sum)
+
 }
