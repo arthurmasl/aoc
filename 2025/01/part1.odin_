@@ -1,0 +1,36 @@
+package main
+
+import "core:fmt"
+import "core:strconv"
+import "core:strings"
+
+main :: proc() {
+	file := #load("example.txt", string)
+	lines := strings.split_lines(strings.trim_right(file, "\n"))
+
+	n := 50
+	p := 0
+
+	for line in lines {
+		s1 := rune(line[0])
+		s2 := strconv.atoi(line[1:])
+
+		if s1 == 'L' {
+			fmt.println(n, s2, (n - s2) %% 100)
+			n -= s2
+		} else if s1 == 'R' {
+			n += s2
+		}
+
+		n %%= 100
+
+		if n == 0 {
+			p += 1
+		}
+
+		assert(n <= 99)
+		assert(n >= 0)
+	}
+
+	fmt.println(p)
+}
