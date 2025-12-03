@@ -6,20 +6,13 @@ import "core:strconv"
 import "core:strings"
 
 find_largest :: proc(voltages: []int) -> int {
-	left := 0
+	number := ""
 	index := -1
-	for v, i in voltages[:len(voltages) - 12] {
-		if v > left {
-			left = v
-			index = i
-		}
-	}
 
-	right := ""
-	for n in 0 ..< 11 {
+	for n in 0 ..< 12 {
 		r := 0
 
-		for v, i in voltages[:len(voltages) - 12 + n] {
+		for v, i in voltages[:len(voltages) - 12 + 1 + n] {
 			if i <= index do continue
 
 			if v > r {
@@ -28,16 +21,14 @@ find_largest :: proc(voltages: []int) -> int {
 			}
 		}
 
-		right = strings.join([]string{right, fmt.tprintf("%v", r)}, "")
+		number = strings.join([]string{number, fmt.tprintf("%v", r)}, "")
 	}
 
-
-	fmt.println(left, right)
-	return strconv.atoi(fmt.tprintf("%v%v", left, right))
+	return strconv.atoi(number)
 }
 
 main :: proc() {
-	file := #load("example.txt", string)
+	file := #load("input.txt", string)
 	lines := strings.split_lines(strings.trim_right(file, "\n"))
 	sum := 0
 
@@ -51,5 +42,4 @@ main :: proc() {
 	}
 
 	fmt.println(sum)
-	assert(sum == 3121910778619)
 }
