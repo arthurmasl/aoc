@@ -1,6 +1,6 @@
 run:
 	# @go run src/2024/11/main.go
-	@watchexec -r -e odin,txt "odin run ./2025/07 -out:build/main"
+	@watchexec -r -e odin,txt "odin run ./2025/08 -out:build/main"
 
 profile:
 	@go run src/2024/11/main.go
